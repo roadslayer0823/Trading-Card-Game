@@ -1,0 +1,406 @@
+[
+  {
+    "id": "C001",
+    "cardName": "Flame Hound",
+    "element": "Fire",
+    "type": "Monster",
+    "cost": "3",
+    "atk": "4",
+    "hp": "6",
+    "skillType": "Passive",
+    "skillTiming": "PerTurn",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "5"
+    ],
+    "skillTarget": "AllEnemies",
+    "skillText": "EndTurn: Deal 5 fire damage to all enemies.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C002",
+    "cardName": "Aqua Spirit",
+    "element": "Water",
+    "type": "Monster",
+    "cost": "2",
+    "atk": "0",
+    "hp": "5",
+    "skillType": "Passive",
+    "skillTiming": "PerTurn",
+    "skillEffect": [
+      "Heal"
+    ],
+    "skillValue": [
+      "5"
+    ],
+    "skillTarget": "Self",
+    "skillText": "EndTurn: Restore 5 HP.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C003",
+    "cardName": "Ice Golem",
+    "element": "Ice",
+    "type": "Monster",
+    "cost": "4",
+    "atk": "3",
+    "hp": "10",
+    "skillType": "OnHit",
+    "skillTiming": "OnHit",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Freeze(1)"
+    ],
+    "skillTarget": "HitTarget",
+    "skillText": "OnHit: Freeze the enemy for 1 turn.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C004",
+    "cardName": "Thunder Lynx",
+    "element": "Lightning",
+    "type": "Monster",
+    "cost": "3",
+    "atk": "5",
+    "hp": "5",
+    "skillType": "Passive",
+    "skillTiming": "PerTurn",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "6"
+    ],
+    "skillTarget": "RandomEnemy",
+    "skillText": "EachTurn: Deal 6 lightning damage to a random enemy.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C005",
+    "cardName": "Wind Pixie",
+    "element": "Wind",
+    "type": "Monster",
+    "cost": "2",
+    "atk": "3",
+    "hp": "4",
+    "skillType": "OnSummon",
+    "skillTiming": "OnSummon",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Spread(1)"
+    ],
+    "skillTarget": "Adjacent",
+    "skillText": "OnSummon: Spread statuses to adjacent units.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C006",
+    "cardName": "Flame Bomb",
+    "element": "Fire",
+    "type": "Spell",
+    "cost": "2",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "10"
+    ],
+    "skillTarget": "AllEnemies",
+    "skillText": "OnPlay: Deal 10 fire damage to all enemies.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C007",
+    "cardName": "Thunderstorm",
+    "element": "Lightning",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "7"
+    ],
+    "skillTarget": "RandomEnemies(3)",
+    "skillText": "OnPlay: Deal 7 lightning damage to 3 random enemies.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C008",
+    "cardName": "Frozen Prison",
+    "element": "Ice",
+    "type": "Spell",
+    "cost": "2",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Freeze(1)"
+    ],
+    "skillTarget": "SingleEnemy",
+    "skillText": "OnPlay: Freeze an enemy for 1 turn.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C009",
+    "cardName": "Healing Rain",
+    "element": "Water",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Heal"
+    ],
+    "skillValue": [
+      "15"
+    ],
+    "skillTarget": "AllAllies",
+    "skillText": "OnPlay: Restore 15 HP to all allies.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C010",
+    "cardName": "Wind Channel",
+    "element": "Wind",
+    "type": "Spell",
+    "cost": "2",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Spread(1)"
+    ],
+    "skillTarget": "Adjacent",
+    "skillText": "OnPlay: Spread element to adjacent units.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C011",
+    "cardName": "Earth Guardian",
+    "element": "Earth",
+    "type": "Monster",
+    "cost": "4",
+    "atk": "2",
+    "hp": "12",
+    "skillType": "Passive",
+    "skillTiming": "PerTurn",
+    "skillEffect": [
+      "Buff"
+    ],
+    "skillValue": [
+      "Defense+3"
+    ],
+    "skillTarget": "Self",
+    "skillText": "EachTurn: Take 3 less damage.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C012",
+    "cardName": "Holy Seraph",
+    "element": "Light",
+    "type": "Monster",
+    "cost": "3",
+    "atk": "2",
+    "hp": "5",
+    "skillType": "Passive",
+    "skillTiming": "PerTurn",
+    "skillEffect": [
+      "Heal"
+    ],
+    "skillValue": [
+      "3"
+    ],
+    "skillTarget": "NearbyAllies",
+    "skillText": "EachTurn: Heal nearby allies 3 HP.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C013",
+    "cardName": "Shadow Reaper",
+    "element": "Dark",
+    "type": "Monster",
+    "cost": "3",
+    "atk": "5",
+    "hp": "4",
+    "skillType": "OnHit",
+    "skillTiming": "OnHit",
+    "skillEffect": [
+      "LifeSteal"
+    ],
+    "skillValue": [
+      "2"
+    ],
+    "skillTarget": "HitTarget",
+    "skillText": "OnHit: Steal 2 HP from the enemy.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C014",
+    "cardName": "Flame Nova",
+    "element": "Fire",
+    "type": "Spell",
+    "cost": "4",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "15"
+    ],
+    "skillTarget": "AreaAroundSelf",
+    "skillText": "OnPlay: Deal 15 fire damage around self.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C015",
+    "cardName": "Earthquake",
+    "element": "Earth",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Damage",
+      "Status"
+    ],
+    "skillValue": [
+      "8",
+      "Stun(1)"
+    ],
+    "skillTarget": "GroundEnemies",
+    "skillText": "OnPlay: Deal 8 damage and stun grounded enemies.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C016",
+    "cardName": "Lightning Net",
+    "element": "Lightning",
+    "type": "Spell",
+    "cost": "2",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Stun(1)"
+    ],
+    "skillTarget": "Enemies(2)",
+    "skillText": "OnPlay: Stun 2 enemies for 1 turn.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C017",
+    "cardName": "Ice Armor",
+    "element": "Ice",
+    "type": "Spell",
+    "cost": "2",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Buff",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Buff",
+      "Status"
+    ],
+    "skillValue": [
+      "Defense+5",
+      "Freeze(1)"
+    ],
+    "skillTarget": "AllyTarget",
+    "skillText": "OnHit: Gain +5 defense and freeze attacker.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C018",
+    "cardName": "Sanctify",
+    "element": "Light",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "FieldBuff",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Buff"
+    ],
+    "skillValue": [
+      "Damage+2"
+    ],
+    "skillTarget": "AllAllies",
+    "skillText": "OnPlay: All allies gain +2 damage.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C019",
+    "cardName": "Shadow Veil",
+    "element": "Dark",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "FieldBuff",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Status"
+    ],
+    "skillValue": [
+      "Untargetable(1)"
+    ],
+    "skillTarget": "AllAllies",
+    "skillText": "OnPlay: All allies become untargetable for 1 turn.",
+    "cardCount": "3"
+  },
+  {
+    "id": "C020",
+    "cardName": "Typhoon Slash",
+    "element": "Wind",
+    "type": "Spell",
+    "cost": "3",
+    "atk": "0",
+    "hp": "0",
+    "skillType": "Instant",
+    "skillTiming": "OnUse",
+    "skillEffect": [
+      "Damage"
+    ],
+    "skillValue": [
+      "12"
+    ],
+    "skillTarget": "LineEnemies",
+    "skillText": "OnPlay: Deal 12 wind damage in a line.",
+    "cardCount": "3"
+  }
+]

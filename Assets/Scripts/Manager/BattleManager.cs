@@ -15,7 +15,6 @@ public class BattleManager : MonoBehaviour
 
     [Header("Player UI Reference")]
     public TMP_Text enemyCurrentBehaviour;
-    public Transform playerHandZone;
     public Transform playerFieldZone;
     public GameObject cardPrefab;
     public HealthPointHandler playerHealth;
@@ -23,7 +22,6 @@ public class BattleManager : MonoBehaviour
     [Header("Enemy UI Reference")]
     public Transform enemyHandZone;
     public Transform enemyFieldZone;
-    public GameObject enemyHandPrefab;
     public HealthPointHandler enemyHealth;
 
     [Header("Setting")]
@@ -32,7 +30,6 @@ public class BattleManager : MonoBehaviour
     private string monsterType = "Monster";
     private string spellType = "Spell";
     private int startingHandSize = 5;
-    private int maxDeckSize = 30;
     private int startingHP = 20;
     private void Awake()
     {
@@ -55,19 +52,12 @@ public class BattleManager : MonoBehaviour
     {
         //player
         DeckManager.Instance.DrawStartHand(startingHandSize, true);
-        foreach (var card in DeckManager.Instance.playerHand)
-        {
-            InstantiateCardPrefab(card, true);
-        }
+        HandManager.Instance.RefreshHandUI(true);
         ManaManager.Instance.StartTurn(Owner.Player);
 
         //enemy
         DeckManager.Instance.DrawStartHand(startingHandSize, false);
-        foreach (var card in DeckManager.Instance.enemyHand)
-        {
-            InstantiateCardPrefab(card, false);
-        }
-
+        HandManager.Instance.RefreshHandUI(false);
         ManaManager.Instance.StartTurn(Owner.Enemy);
     }
 
@@ -75,7 +65,9 @@ public class BattleManager : MonoBehaviour
     {
         UpdateFieldStatus(Owner.Enemy);
         ManaManager.Instance.StartTurn(Owner.Player);
+        Debug.Log($"[BattleManager] Player turn start. Hand count before draw: {DeckManager.Instance.playerHand.Count}");
         DrawOneCard(true);
+        Debug.Log($"[BattleManager] Player hand count after draw: {DeckManager.Instance.playerHand.Count}");
         currentTurn = TurnState.Player;
 
         ResetFieldCards(Owner.Player);
@@ -83,7 +75,6 @@ public class BattleManager : MonoBehaviour
 
     public void StartEnemyTurn()
     {
-        UpdateFieldStatus(Owner.Player);
         ManaManager.Instance.StartTurn(Owner.Enemy);
         DrawOneCard(false);
         currentTurn = TurnState.Enemy;
@@ -109,43 +100,11 @@ public class BattleManager : MonoBehaviour
 
     public void DrawOneCard(bool isPlayer)
     {
-        Transform handZone = isPlayer ? playerHandZone : enemyHandZone;
-
-        if (handZone.childCount >= 9)
-        {
+        if ((isPlayer ? DeckManager.Instance.playerHand.Count : DeckManager.Instance.enemyHand.Count) >= 10)
             return;
-        }
 
         var card = DeckManager.Instance.DrawOneCard(isPlayer);
-        if (card != null)
-        {
-            InstantiateCardPrefab(card, isPlayer);
-        }
-    }
-
-    public void InstantiateCardPrefab(ModelDatas.CardData card, bool isPlayer)
-    {
-        GameObject cardObj = Instantiate(isPlayer ? cardPrefab : enemyHandPrefab, isPlayer ? playerHandZone : enemyHandZone);
-        CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
-        bool isMonster = card.type == monsterType;
-
-        cardDisplay.owner = isPlayer ? Owner.Player : Owner.Enemy;
-
-        if (isPlayer)
-        {
-            cardObj.AddComponent<BattleCardDragHandler>();
-            cardDisplay.cardCountText.gameObject.SetActive(false);
-            cardDisplay.stateArea.gameObject.SetActive(isMonster);
-            cardDisplay.SetCard(card);
-            cardDisplay.currentZone = CardZone.Hand;
-            cardDisplay.UpdateDisplay();
-            cardDisplay.SetupCardUI(card);
-        }
-        else
-        {
-            cardDisplay.SetCard(card);
-            cardDisplay.currentZone = CardZone.Hand;
-        }
+        HandManager.Instance.DrawCard(card, isPlayer);
     }
 
     public void PlayCard(BattleCardDragHandler card)
@@ -155,7 +114,16 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log($"[BattleManager] 卡牌 {card.gameObject.name} 被打出！");
 
-        if (cardDisplay.cardType == "Spell")
+        bool isPlayer = cardDisplay.owner == Owner.Player;
+        var handList = isPlayer ? DeckManager.Instance.playerHand : DeckManager.Instance.enemyHand;
+
+        if (handList.Contains(cardDisplay.GetCardData()))
+        {
+            handList.Remove(cardDisplay.GetCardData());
+            Debug.Log($"[BattleManager] Removed {cardDisplay.cardNameText.text} from hand. New hand count: {handList.Count}");
+        }
+
+        if (cardDisplay.cardType == spellType)
         {
             Debug.Log($"[BattleManager] Spell {cardDisplay.cardNameText.text} 正在发动效果...");
             SpellExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardData());
@@ -167,6 +135,7 @@ public class BattleManager : MonoBehaviour
                 if (fs != null) fs.isOccupied = false;
             }
             Destroy(card.gameObject);
+            return;
         }
         else
         {
@@ -176,10 +145,22 @@ public class BattleManager : MonoBehaviour
 
     public void Attack(CardDisplay attacker, CardDisplay target = null)
     {
-        int attackerDmg = attacker.atkPoint;
-        int targetDmg = target != null ? target.atkPoint : 0;
+        int attackerDmg = attacker.atkPoint + attacker.tempAtkBuff;
+        int targetDmg = target != null ? target.atkPoint + target.tempAtkBuff: 0;
 
         if (attackerDmg <= 0) return;
+
+        if (!attacker.isAttack)
+        {
+            Debug.Log($"{attacker.cardName} 被眩晕或已攻击过，无法行动！");
+            return;
+        }
+        if (attacker.isFrozen && attacker.atkPoint <= 0)
+        {
+            Debug.Log($"{attacker.cardName} 被冰冻，攻击力为0，无法造成伤害！");
+            attacker.SetIdleAfterAttack(); // 还是要标记已攻击
+            return;
+        }
 
         if (target == null)
         {
@@ -213,10 +194,63 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            target.TakeDamage(attackerDmg);
-            attacker.TakeDamage(targetDmg);
+            int finalAttackerDmg = CalculateElementReaction(attacker, target, attackerDmg);
+            int finalTargetDmg = CalculateElementReaction(target, attacker, targetDmg);
+
+            target.TakeDamage(finalAttackerDmg);
+            attacker.TakeDamage(finalTargetDmg);
+
+            Debug.Log($"战斗结果: {attacker.cardName} [{string.Join(",", attacker.elementTags)}] → {target.cardName} [{string.Join(",", target.elementTags)}] 造成 {finalAttackerDmg} 伤害");
         }
         attacker.SetIdleAfterAttack();
+    }
+
+    private int CalculateElementReaction(CardDisplay attacker, CardDisplay defender, int baseDamage)
+    {
+        HashSet<string> attTags = new HashSet<string>(attacker.elementTags.ConvertAll(t => t.ToLower()));
+        HashSet<string> defTags = new HashSet<string>(defender.elementTags.ConvertAll(t => t.ToLower()));
+
+        Debug.Log($"[元素反应检查] {attacker.cardName} tags: [{string.Join(", ", attTags)}] → {defender.cardName} tags: [{string.Join(", ", defTags)}] 基础伤害 {baseDamage}");
+
+        // 蒸发
+        if (attTags.Contains("fire") && defTags.Contains("water"))
+        {
+            Debug.Log("⚡ 蒸发反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+        if (attTags.Contains("water") && defTags.Contains("fire"))
+        {
+            Debug.Log("💨 蒸发反应！伤害 ×2");
+            return baseDamage * 2;
+        }
+
+        // 融化
+        if (attTags.Contains("fire") && defTags.Contains("ice"))
+        {
+            Debug.Log("🔥 融化反应！伤害 ×2");
+            return baseDamage * 2;
+        }
+        if (attTags.Contains("ice") && defTags.Contains("fire"))
+        {
+            Debug.Log("❄️ 融化反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+
+        // 雷 + 水 = 感电
+        if (attTags.Contains("lightning") && defTags.Contains("water"))
+        {
+            Debug.Log("⚡ 感电反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+        if (attTags.Contains("water") && defTags.Contains("lightning"))
+        {
+            Debug.Log("💧 感电反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+
+        // 可以继续加：风 + 任意 = 扩散、超载 等
+
+        return baseDamage;
     }
 
     private void UpdateFieldStatus(Owner owner)
@@ -227,7 +261,7 @@ public class BattleManager : MonoBehaviour
             CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
             if (card != null && card.cardType == monsterType)
             {
-                card.UpdateStatusAtTurnStart();
+                card.UpdateStatusAtTurnEnd();
             }
         }
     }
@@ -240,7 +274,10 @@ public class BattleManager : MonoBehaviour
             CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
             if (card != null && card.cardType == monsterType)
             {
-                card.ResetAttackState();
+                if(card.stunTurnRemaining <= 0)
+                {
+                     card.ResetAttackState();
+                }
             }
         }
     }
@@ -289,7 +326,18 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         EnemyAttack();
         yield return new WaitForSeconds(1f);
+
+        ProcessStatusEndOfTurn();
+
         StartPlayerTurn();
+    }
+
+    private void ProcessStatusEndOfTurn()
+    {
+        foreach (Transform slot in playerFieldZone)
+            slot.GetComponentInChildren<CardDisplay>()?.UpdateStatusAtTurnEnd();
+        foreach (Transform slot in enemyFieldZone)
+            slot.GetComponentInChildren<CardDisplay>()?.UpdateStatusAtTurnEnd();
     }
 
     private void EnemyPlayCard()
@@ -311,6 +359,7 @@ public class BattleManager : MonoBehaviour
             {
                 ManaManager.Instance.SpendMana(Owner.Enemy, card.cost);
 
+                Debug.Log($"[Enemy] Trying to play: {card.cardName}, hand count before removal: {enemyhand.Count}, handZone child count: {enemyHandZone.childCount}");
                 Transform toRemove = null;
                 foreach (Transform t in enemyHandZone)
                 {
@@ -324,8 +373,10 @@ public class BattleManager : MonoBehaviour
                 if (toRemove != null)
                 {
                     Destroy(toRemove.gameObject);
+                    Debug.Log($"[Enemy] Removed card object from handZone. New child count: {enemyHandZone.childCount}");
                 }
                 enemyhand.Remove(card);
+                Debug.Log($"[Enemy] Removed card from hand list. New hand count: {enemyhand.Count}");
 
                 GameObject cardObj = Instantiate(cardPrefab, slot);
                 CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
@@ -349,21 +400,14 @@ public class BattleManager : MonoBehaviour
             CardDisplay attacker = slot.GetComponentInChildren<CardDisplay>();
             if (attacker == null || attacker.cardType != monsterType || !attacker.isAttack) continue;
 
-            List<CardDisplay> playerMonsters = new List<CardDisplay>();
-            foreach (Transform playerSlot in playerFieldZone)
-            {
-                CardDisplay playerCard = playerSlot.GetComponentInChildren<CardDisplay>();
-                if (playerCard != null && playerCard.cardType == monsterType)
-                {
-                    playerMonsters.Add(playerCard);
-                }
-            }
+            List<EffectTarget> validTargets = TargetSelector.GetTargets("Enemies", Owner.Enemy);
 
-            if (playerMonsters.Count > 0)
+            if (validTargets.Count > 0)
             {
-                CardDisplay target = playerMonsters[Random.Range(0, playerMonsters.Count)];
-                EnemyLog($"[Enemy] {attacker.cardNameText.text} attacked {target.cardNameText.text}");
-                Attack(attacker, target);
+                EffectTarget randomTarget = validTargets[Random.Range(0, validTargets.Count)];
+                CardDisplay targetCard = randomTarget.card;
+                EnemyLog($"[Enemy] {attacker.cardNameText.text} attacked {targetCard.cardNameText.text}");
+                Attack(attacker, targetCard);
             }
             else
             {

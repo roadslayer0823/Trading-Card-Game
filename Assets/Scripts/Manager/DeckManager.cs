@@ -120,17 +120,30 @@ public class DeckManager : MonoBehaviour
         var deck = isPlayer ? playerDeckList : enemyDeckList;
         string owner = isPlayer ? "Player" : "Enemy";
 
-        if (deck.Count == 0) return null;
-        if (hand.Count >= maxHandSize) return null;
+        Debug.Log($"[{owner}] Attempting to draw a card...");
+        Debug.Log($"[{owner}] Current hand count: {hand.Count}, deck count: {deck.Count}");
+
+        if (deck.Count == 0) 
+        {
+            Debug.LogWarning($"[{owner}] Deck is empty, cannot draw!");
+            return null;
+        }
+        if (hand.Count >= maxHandSize) 
+        {
+            Debug.LogWarning($"[{owner}] Hand is full, cannot draw!");
+            return null;
+        }
 
         int index = Random.Range(0, deck.Count);
         var card = deck[index];
 
         deck.RemoveAt(index);
-        hand.Add(deck[index]);
+        hand.Add(card);
 
-        Debug.Log($"Drew card: {card.cardName}");
-        Debug.Log($"{owner} deck now has {deck.Count} cards left.");
+        Debug.Log($"[{owner}] Drew card: {card.cardName}");
+        Debug.Log($"[{owner}] Deck now has {deck.Count} cards left.");
+        Debug.Log($"[{owner}] Hand now has {hand.Count} cards.");
+
         return card;
     }
 

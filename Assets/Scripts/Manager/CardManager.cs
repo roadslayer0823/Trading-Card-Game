@@ -97,7 +97,7 @@ public class CardManager : MonoBehaviour
             deckCountText.text = $"Deck: {currentDeckCount}/{maxDeckCount}";
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(deckCountText.GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(deckCountText.GetComponentInParent<RectTransform>());
     }
 
     public void TransferCard(string cardID, PanelType from, PanelType to)

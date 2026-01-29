@@ -195,8 +195,8 @@
     "skillValue": [
       "Spread(1)"
     ],
-    "skillTarget": "Adjacent",
-    "skillText": "OnPlay: Spread element to adjacent units.",
+    "skillTarget": "SingleAlly",
+    "skillText": "OnPlay: Spread element to random 2 ally units.",
     "cardCount": "3"
   },
   {
@@ -332,15 +332,13 @@
     "skillType": "Buff",
     "skillTiming": "OnUse",
     "skillEffect": [
-      "Buff",
-      "Status"
+      "Buff"
     ],
     "skillValue": [
-      "Defense+5",
-      "Freeze(1)"
+      "HP+5"
     ],
-    "skillTarget": "AllyTarget",
-    "skillText": "OnHit: Gain +5 defense and freeze attacker.",
+    "skillTarget": "SingleAlly",
+    "skillText": "OnPlay: Gain +5 hp",
     "cardCount": "3"
   },
   {
@@ -379,8 +377,8 @@
     "skillValue": [
       "Untargetable(1)"
     ],
-    "skillTarget": "AllAllies",
-    "skillText": "OnPlay: All allies become untargetable for 1 turn.",
+    "skillTarget": "SingleAlly",
+    "skillText": "OnPlay: Choose an ally become untargetable for 1 turn.",
     "cardCount": "3"
   },
   {

@@ -21,6 +21,29 @@ public class SpellExecutor : MonoBehaviour
         }
     }
 
+    public static void ExecuteSpellWithManualSource(CardDisplay spellCard, ModelDatas.CardData data, CardDisplay manualSource)
+    {
+        for (int i = 0; i < data.skillEffect.Count; i++)
+        {
+            string effectType = data.skillEffect[i];
+            string rawValue = data.skillValue[i];
+
+            EffectBase effect = EffectFactory.CreateEffect(effectType);
+
+            // 创建假的 EffectTarget 指向 manualSource
+            EffectTarget fakeTarget = EffectTarget.FromCard(manualSource);
+
+            var context = new EffectContext(
+                sourceOwner: spellCard.owner,
+                target: fakeTarget,
+                value: ParseEffectValue(rawValue),
+                rawValue: rawValue
+            );
+
+            effect.ApplyEffect(spellCard, context);
+        }
+    }
+
     private static int ParseEffectValue(string raw)
     {
         if (int.TryParse(raw, out int val)) return val;

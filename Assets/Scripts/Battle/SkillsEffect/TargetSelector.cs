@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public static class TargetSelector
 {
@@ -18,7 +19,8 @@ public static class TargetSelector
         switch (baseType)
         {
             case "SingleEnemy":
-                if(enemyCards.Count > 0)
+                var validEnemies = enemyCards.Where(c => !c.IsUntargetable()).ToList();
+                if(validEnemies.Count > 0)
                 {
                     var pick = enemyCards[Random.Range(0, enemyCards.Count)];
                     results.Add(EffectTarget.FromCard(pick));
@@ -35,8 +37,9 @@ public static class TargetSelector
             case "RandomEnemies":
             case "Enemies":
                 {
+                    var validPool = enemyCards.Where(c => !c.IsUntargetable()).ToList();
                     int count = Mathf.Min(number, enemyCards.Count);
-                    var pool = new List<CardDisplay>(enemyCards);
+                    var pool = new List<CardDisplay>(validPool);
                     for(int i = 0; i < count && pool.Count > 0; i++)
                     {
                         int index = Random.Range(0, pool.Count);
@@ -49,7 +52,8 @@ public static class TargetSelector
             case "AllAllies":
                 foreach (var item in playerCards)
                 {
-                    results.Add(EffectTarget.FromCard(item));
+                    if(!item.IsUntargetable())
+                        results.Add(EffectTarget.FromCard(item));
                 }
                 break;
 
@@ -67,6 +71,14 @@ public static class TargetSelector
                 foreach (var c in enemyCards) results.Add(EffectTarget.FromCard(c));
                 break;
 
+            case "SingleAlly":
+                if (playerCards.Count > 0)
+                {
+                    var pick = playerCards[Random.Range(0, playerCards.Count)];
+                    results.Add(EffectTarget.FromCard(pick));
+                }
+                break;
+
             default:
                 Debug.LogWarning($"[TargetSelector] 未识别的 targetType: {targetType}");
                 break;
@@ -74,6 +86,25 @@ public static class TargetSelector
         }
         Debug.Log($"[TargetSelector] {targetType} -> 选中 {results.Count} 个目标");
         return results;
+    }
+
+    public static List<CardDisplay> GetSpreadTargets(Owner owner, int count = 2, CardDisplay exclude = null)
+    {
+        List<CardDisplay> allies = BattleManager.Instance.GetAllyUnits(owner);
+        if(exclude != null) allies.Remove(exclude);
+
+        List<CardDisplay> selected = new List<CardDisplay>();
+        count = Mathf.Min(count, allies.Count);
+
+        List<CardDisplay> pool = new List<CardDisplay>(allies);
+        for (int i = 0; i < count && pool.Count > 0; i++)
+        {
+            int index = Random.Range(0, pool.Count);
+            selected.Add(pool[index]);
+            pool.RemoveAt(index);   
+        }
+
+        return selected;
     }
 
     private static int ExtractNumberInParentheses(string input)

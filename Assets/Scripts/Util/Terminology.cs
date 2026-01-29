@@ -18,4 +18,11 @@ public static class Terminology
     public static string SELF = "Self";
     public static string LEADER = "Leader";
     public static string ALL = "All";
+
+    public static string FIRE = "fire";
+    public static string WATER = "water";
+    public static string ICE = "ice";
+    public static string WIND = "wind";
+    public static string LIGHT = "light";
+    public static string DARK = "dark";
 }

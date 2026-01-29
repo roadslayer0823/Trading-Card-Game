@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 public enum CardZone
 {
@@ -11,7 +13,8 @@ public enum CardZone
 }
 
 public class CardDisplay : MonoBehaviour
-{   public enum Element
+{
+    public enum Element
     {
         Fire,
         Water,
@@ -34,6 +37,7 @@ public class CardDisplay : MonoBehaviour
     public CardZone currentZone = CardZone.None;
     public Owner owner = Owner.None;
 
+    [HideInInspector] public PanelType currentPanel;
     [HideInInspector] public string cardName;
     [HideInInspector] public string cardType;
     [HideInInspector] public string cardID;
@@ -42,9 +46,14 @@ public class CardDisplay : MonoBehaviour
     [HideInInspector] public int currentCount;
     [HideInInspector] public int deckCount;
     [HideInInspector] public int maxHpPoint;
-    [HideInInspector] public PanelType currentPanel;
+    [HideInInspector] public int tempAtkBuff = 0;
+    [HideInInspector] public int tempHpBuff = 0;
+    [HideInInspector] public int stunTurnRemaining = 0;
+    [HideInInspector] public int untargetableTurnRemaining = 0;
+    [HideInInspector] public int originalAtkPoint;
     [HideInInspector] public bool isAttack = true;
     [HideInInspector] public bool isFrozen = false;
+    [HideInInspector] public List<string> elementTags = new();
 
     private ModelDatas.CardData cardData;
     private int frozenTurnRemaining = 0;
@@ -70,6 +79,8 @@ public class CardDisplay : MonoBehaviour
         atkPoint = data.atk;
         hpPoint = data.hp;
         maxHpPoint = data.hp;
+        elementTags.Clear();
+        elementTags.Add(data.element);
     }
 
     public void SetupCardUI(ModelDatas.CardData data)
@@ -90,7 +101,7 @@ public class CardDisplay : MonoBehaviour
 
     public void UpdateDisplay()
     {
-        if (owner == Owner.Player) 
+        if (owner == Owner.Player)
         {
             if (currentZone == CardZone.Hand)
             {
@@ -104,49 +115,97 @@ public class CardDisplay : MonoBehaviour
         }
     }
 
-    public void UpdateStatusAtTurnStart()
-    {
+   public void UpdateStatusAtTurnEnd()
+   {
         if (isFrozen)
         {
             frozenTurnRemaining--;
             if (frozenTurnRemaining <= 0)
             {
                 isFrozen = false;
-                isAttack = true;
-                GetComponent<CanvasGroup>().alpha = 1f;
-                Debug.Log($"{cardName} 的冰冻状态解除。");
+                atkPoint = originalAtkPoint;
+                atkText.text = "ATK: " + atkPoint;
+                Debug.Log($"{cardName} 的冰冻状态解除，攻击力恢复为 {atkPoint}。");
             }
+        }
+
+        if (stunTurnRemaining > 0)
+        {
+            stunTurnRemaining--;
+            if (stunTurnRemaining <= 0)
+            {
+                isAttack = true;
+                Debug.Log($"{cardName} 的眩晕状态解除，可以攻击了。");
+            }
+        }
+
+        if(untargetableTurnRemaining > 0)
+        {
+            untargetableTurnRemaining--;
+            if(untargetableTurnRemaining <= 0)
+            {
+                Debug.Log($"{cardName} 的 Untargetable 狀態解除");
+                GetComponent<CanvasGroup>().alpha = 1f;
+            }
+        }
+
+        // Auto-restore alpha when BOTH effects are gone
+        if (!isFrozen && stunTurnRemaining <= 0)
+        {
+            GetComponent<CanvasGroup>().alpha = 1f;
         }
     }
 
     public void ApplyFreeze(int duration)
     {
+        if (!isFrozen)
+        {
+            originalAtkPoint = atkPoint;  // Save original ATK
+            atkPoint = 0;
+            atkText.text = "ATK: 0";
+        }
+
         isFrozen = true;
-        frozenTurnRemaining = duration;
-        isAttack = false;
+        frozenTurnRemaining = Mathf.Max(frozenTurnRemaining, duration);
         GetComponent<CanvasGroup>().alpha = 0.5f;
-        Debug.Log($"{cardName} 被冰冻，持续 {duration} 回合。");
+    }
+
+    public void ApplyStun(int duration)
+    {
+        isAttack = false;
+        stunTurnRemaining = Mathf.Max(stunTurnRemaining, duration);
+        GetComponent<CanvasGroup>().alpha = 0.5f;
+    }
+
+    public void ApplyUntargetable(int duration)
+    {
+        untargetableTurnRemaining = Mathf.Max(untargetableTurnRemaining, duration);
+        GetComponent<CanvasGroup>().alpha = 0.7f;
+        Debug.Log($"{cardName} 獲得 Untargetable（無法被選為目標），持續 {duration} 回合");
     }
 
     public void Heal(int amount)
     {
-        hpPoint = Mathf.Min(hpPoint + amount, maxHpPoint);
-        hpText.text = "HP: " + hpPoint;
-        Debug.Log($"{cardName} 恢复 {amount} 点HP，当前HP为 {hpPoint}/{maxHpPoint}");
+        int newMaxHp = maxHpPoint + tempHpBuff;
+        hpPoint = Mathf.Min(hpPoint + amount, newMaxHp);
+        hpText.text = $"HP: {hpPoint} (+{tempHpBuff})";
+        Debug.Log($"{cardName} 恢复 {amount} 点HP，当前HP为 {hpPoint}/{newMaxHp}");
     }
 
     public void TakeDamage(int dmg)
     {
         hpPoint -= dmg;
-        if(hpPoint <= 0)
+
+        if (hpPoint <= 0)
         {
             FieldSlot parentSlot = GetComponentInParent<FieldSlot>();
-            if(parentSlot  != null)
+            if (parentSlot != null)
             {
                 parentSlot.isOccupied = false;
             }
             Destroy(gameObject);
         }
+
         hpText.text = "HP: " + Mathf.Max(hpPoint, 0);
         Debug.Log($"{cardName} take {dmg} damage, final hp is {hpPoint}");
     }
@@ -157,9 +216,23 @@ public class CardDisplay : MonoBehaviour
         cardCountText.text = $"x{currentCount}";
     }
 
+    public void AddElementTag(string element)
+    {
+        string lowerElement = element.ToLower();
+        if (!elementTags.Contains(lowerElement))
+        {
+            elementTags.Add(lowerElement);
+            Debug.Log($"[{cardName}] 获得新元素标签: {lowerElement}");
+        }
+        else
+        {
+            Debug.Log($"[{cardName}] 已拥有元素标签: {lowerElement} (跳过)");
+        }
+    }
+
     private void SetElementColor(string element)
     {
-        if(elementColors.TryGetValue(element.ToLower(), out var color))
+        if (elementColors.TryGetValue(element.ToLower(), out var color))
         {
             elementIcon.color = color;
         }
@@ -169,7 +242,7 @@ public class CardDisplay : MonoBehaviour
         }
     }
 
-    public void SetIdleAfterAttack() 
+    public void SetIdleAfterAttack()
     {
         isAttack = false;
         GetComponent<CanvasGroup>().alpha = 0.7f;
@@ -189,6 +262,7 @@ public class CardDisplay : MonoBehaviour
     {
         GetComponent<CanvasGroup>().alpha = isGreyed ? 0.5f : 1f;
     }
+
     private void OnEnable()
     {
         ManaManager.OnManaChanged += UpdateDisplay;
@@ -196,5 +270,10 @@ public class CardDisplay : MonoBehaviour
     private void OnDisable()
     {
         ManaManager.OnManaChanged -= UpdateDisplay;
+    }
+
+    public bool IsUntargetable()
+    {
+        return untargetableTurnRemaining > 0;
     }
 }

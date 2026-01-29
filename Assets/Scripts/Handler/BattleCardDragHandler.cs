@@ -56,36 +56,62 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
 
         bool isPlaced = false;
 
-        if(eventData.pointerEnter != null) 
+        CardDisplay cardDisplay = GetComponent<CardDisplay>();
+        ModelDatas.CardData data = cardDisplay.GetCardData();
+
+        if (eventData.pointerEnter != null)
         {
-            FieldSlot slot = eventData.pointerEnter.GetComponent<FieldSlot>();
-            if (slot != null) 
+            FieldSlot slot = eventData.pointerEnter.GetComponentInParent<FieldSlot>();  // 支持拖到卡上
+            if (slot != null)
             {
-                CardDisplay cardDisplay = this.GetComponent<CardDisplay>();
-
-                if (!ManaManager.Instance.CanAfford(int.Parse(cardDisplay.costText.text), cardDisplay.owner) || slot.isOccupied) 
+                // 检查是否是法术且需要手动选源 (SingleAlly)
+                if (cardDisplay.cardType == "Spell" && data.skillTarget == "SingleAlly")
                 {
-                    ReturnToHand();
-                    Destroy(placeholder);
-                    return;
+                    CardDisplay targetOnSlot = slot.GetComponentInChildren<CardDisplay>();
+                    if (targetOnSlot != null && targetOnSlot.owner == cardDisplay.owner && targetOnSlot.cardType == "Monster")
+                    {
+                        // 手动选择成功！传播以 targetOnSlot 为源
+                        ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost);
+                        SpellExecutor.ExecuteSpellWithManualSource(cardDisplay, data, targetOnSlot);
+
+                        Destroy(gameObject);  // 法术消耗
+                        slot.isOccupied = false;  // 不占位
+                        isPlaced = true;
+                    }
+                    else
+                    {
+                        // 拖到空位或敌方怪兽 → 无效
+                        ReturnToHand();
+                    }
                 }
-
-                ManaManager.Instance.SpendMana(cardDisplay.owner, int.Parse(cardDisplay.costText.text));
-                slot.isOccupied = true;
-                transform.SetParent(slot.transform, false);
-                rectTransform.localScale = Vector3.one;
-                rectTransform.localPosition = Vector3.zero;
-
-                isLocked = true;
-                cardDisplay.currentZone = CardZone.Field;
-                cardDisplay.UpdateDisplay();
-                BattleManager.Instance.PlayCard(this);
-                if(cardDisplay.cardType == "Monster")
+                else
                 {
-                    this.AddComponent<AttackDragHandler>();
-                }
+                    // 正常出牌逻辑（怪兽或不需要手动选的法术）
+                    if (!ManaManager.Instance.CanAfford(data.cost, cardDisplay.owner) || slot.isOccupied)
+                    {
+                        ReturnToHand();
+                        Destroy(placeholder);
+                        return;
+                    }
 
-                isPlaced = true;
+                    ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost);
+                    slot.isOccupied = true;
+                    transform.SetParent(slot.transform, false);
+                    rectTransform.localScale = Vector3.one;
+                    rectTransform.localPosition = Vector3.zero;
+
+                    isLocked = true;
+                    cardDisplay.currentZone = CardZone.Field;
+                    cardDisplay.UpdateDisplay();
+                    BattleManager.Instance.PlayCard(this);
+
+                    if (cardDisplay.cardType == "Monster")
+                    {
+                        this.AddComponent<AttackDragHandler>();
+                    }
+
+                    isPlaced = true;
+                }
             }
         }
 

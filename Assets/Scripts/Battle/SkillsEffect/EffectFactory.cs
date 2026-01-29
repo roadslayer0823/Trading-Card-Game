@@ -10,7 +10,7 @@ public static class EffectFactory
             "Damage" => new DamageEffect(),
             "Heal" => new HealingEffect(),
             "Status" => new StatusEffect(),
-            //"Buff" => new BuffEffect(),
+            "Buff" => new BuffEffect(),
             _ => throw new ArgumentException($"Unknown effect type: {effectType}")
         };
     }

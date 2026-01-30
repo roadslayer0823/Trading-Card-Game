@@ -138,10 +138,17 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        if (cardDisplay.GetCardData().skillTiming == "OnSummon")
+        if(cardDisplay.cardType == monsterType)
         {
-            EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), 0, "");
-            EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
+            var data = cardDisplay.GetCardData();
+            foreach(var trigger in data.triggers)
+            {
+                if (trigger.skillTiming == "OnSummon")
+                {
+                    EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), 0, "");
+                    EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
+                }
+            }
         }
 
         else
@@ -207,10 +214,14 @@ public class BattleManager : MonoBehaviour
             target.TakeDamage(finalAttackerDmg);
             attacker.TakeDamage(finalTargetDmg);
 
-            if (target.GetCardData().skillTiming == "OnHit")
+            var targetData = target.GetCardData();
+            foreach(var trigger in targetData.triggers)
             {
-                EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(attacker), 0, "");  // attacker 作為 context
-                EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
+                if (trigger.skillTiming == "OnHit")
+                {
+                    EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(attacker), 0, "");  // attacker 作為 context
+                    EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
+                }
             }
 
             Debug.Log($"战斗结果: {attacker.cardName} [{string.Join(",", attacker.elementTags)}] → {target.cardName} [{string.Join(",", target.elementTags)}] 造成 {finalAttackerDmg} 伤害");
@@ -292,10 +303,14 @@ public class BattleManager : MonoBehaviour
                      card.ResetAttackState();
                 }
 
-                if (card.GetCardData().skillTiming == "PerTurn")
+                var data = card.GetCardData();
+                foreach(var trigger in data.triggers)
                 {
-                    EffectContext turnContext = new EffectContext(card.owner, EffectTarget.FromCard(card), 0, "");
-                    EffectExecutor.TriggerMonsterEffect(card, card.GetCardData(), turnContext);
+                    if (trigger.skillTiming == "PerTurn" || trigger.skillTiming == "OnTurnEnd")
+                    {
+                        EffectContext turnContext = new EffectContext(card.owner, null, 0, "");
+                        EffectExecutor.TriggerMonsterEffect(card, data, turnContext);
+                    }
                 }
             }
         }

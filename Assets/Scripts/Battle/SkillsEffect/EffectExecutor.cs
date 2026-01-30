@@ -5,57 +5,71 @@ public class EffectExecutor : MonoBehaviour
 {
     public static void ExecuteSpell(CardDisplay source, ModelDatas.CardData data)
     {
-        for (int i = 0; i < data.skillEffect.Count; i++)
+        foreach(var trigger in data.triggers)
         {
-            string effectType = data.skillEffect[i];
-            string rawValue = data.skillValue[i];
-
-            EffectBase effect = EffectFactory.CreateEffect(effectType);
-            List<EffectTarget> targets = TargetSelector.GetTargets(data.skillTarget, source.owner);
+            List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, source.owner);
 
             foreach (var target in targets)
             {
-                var context = new EffectContext(source.owner, target, ParseEffectValue(rawValue), rawValue: rawValue);
-                effect.ApplyEffect(source, context);
+                for(int i = 0; i < trigger.skillEffect.Count; i++)
+                {
+                    string effectType = trigger.skillEffect[i];
+                    string rawValue = trigger.skillValue[i];
+
+                    EffectBase effect = EffectFactory.CreateEffect(effectType);
+                    var context = new EffectContext(source.owner, target, ParseEffectValue(rawValue), rawValue: rawValue);
+                    effect.ApplyEffect(source, context);
+                }
             }
         }
     }
 
+    //use to manual select a spell target
     public static void ExecuteSpellWithManualSource(CardDisplay spellCard, ModelDatas.CardData data, CardDisplay manualSource)
     {
-        for (int i = 0; i < data.skillEffect.Count; i++)
+        foreach(var trigger in data.triggers)
         {
-            string effectType = data.skillEffect[i];
-            string rawValue = data.skillValue[i];
-
-            EffectBase effect = EffectFactory.CreateEffect(effectType);
-
             // 创建假的 EffectTarget 指向 manualSource
             EffectTarget fakeTarget = EffectTarget.FromCard(manualSource);
+            var context = new EffectContext(spellCard.owner, fakeTarget, 0, " ");
 
-            var context = new EffectContext(
-                sourceOwner: spellCard.owner,
-                target: fakeTarget,
-                value: ParseEffectValue(rawValue),
-                rawValue: rawValue
-            );
+            for (int i = 0; i < trigger.skillEffect.Count; i++)
+            {
+                string effectType = trigger.skillEffect[i];
+                string rawValue = trigger.skillValue[i];
 
-            effect.ApplyEffect(spellCard, context);
+                EffectBase effect = EffectFactory.CreateEffect(effectType);
+                context.rawValue = rawValue;
+                context.value = ParseEffectValue(rawValue);
+                effect.ApplyEffect(spellCard, context);
+            }
         }
     }
 
     public static void TriggerMonsterEffect(CardDisplay sourceCard, ModelDatas.CardData data, EffectContext context)
     {
-        if (data.skillEffect == null || data.skillEffect.Count == 0) return;
-
-        for (int i = 0; i < data.skillEffect.Count; i++)
+        foreach(var trigger in data.triggers)
         {
-            string effectType = data.skillEffect[i];
-            string rawValue = data.skillValue[i];
+            if (trigger.skillEffect == null || trigger.skillEffect.Count == 0) return;
+            Debug.Log($"[TriggerMonsterEffect] {sourceCard.cardName} 觸發 {trigger.skillTiming}，目標類型: {trigger.skillTarget}，sourceOwner: {sourceCard.owner}");
 
-            EffectBase effect = EffectFactory.CreateEffect(effectType);
-            var targetContext = new EffectContext(sourceCard.owner, context.target, ParseEffectValue(rawValue), rawValue);
-            effect.ApplyEffect(sourceCard, targetContext);
+            for (int i = 0; i < trigger.skillEffect.Count; i++)
+            {
+                string effectType = trigger.skillEffect[i];
+                string rawValue = trigger.skillValue[i];
+                EffectBase effect = EffectFactory.CreateEffect(effectType);
+
+                var targets = TargetSelector.GetTargets(trigger.skillTarget, sourceCard.owner, context);
+                Debug.Log($"[TriggerMonsterEffect] 取得目標數: {targets.Count}，類型: {trigger.skillTarget}");
+
+                var targetContext = new EffectContext(sourceCard.owner, context.target, ParseEffectValue(rawValue), rawValue);
+
+                foreach (var target in targets)
+                {
+                    targetContext.target = target;
+                    effect.ApplyEffect(sourceCard, targetContext);
+                }
+            }
         }
     }
 

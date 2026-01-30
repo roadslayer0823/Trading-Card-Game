@@ -59,13 +59,23 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         CardDisplay cardDisplay = GetComponent<CardDisplay>();
         ModelDatas.CardData data = cardDisplay.GetCardData();
 
+        bool needsManualSource = false;
+        foreach (var trigger in data.triggers)
+        {
+            if (trigger.skillTiming == "OnUse" && trigger.skillTarget == "SingleAlly")
+            {
+                needsManualSource = true;
+                break;
+            }
+        }
+
         if (eventData.pointerEnter != null)
         {
             FieldSlot slot = eventData.pointerEnter.GetComponentInParent<FieldSlot>();  // 支持拖到卡上
             if (slot != null)
             {
                 // 检查是否是法术且需要手动选源 (SingleAlly)
-                if (cardDisplay.cardType == "Spell" && data.skillTarget == "SingleAlly")
+                if (cardDisplay.cardType == "Spell" && needsManualSource)
                 {
                     CardDisplay targetOnSlot = slot.GetComponentInChildren<CardDisplay>();
                     if (targetOnSlot != null && targetOnSlot.owner == cardDisplay.owner && targetOnSlot.cardType == "Monster")

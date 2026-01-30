@@ -5,7 +5,7 @@ using System.Linq;
 
 public static class TargetSelector
 {
-    public static List<EffectTarget> GetTargets(string targetType, Owner owner)
+    public static List<EffectTarget> GetTargets(string targetType, Owner owner, EffectContext context = null)
     {
         List<EffectTarget> results = new();
         string baseType = Regex.Replace(targetType, @"\([^)]*\)", "");
@@ -15,6 +15,8 @@ public static class TargetSelector
         List<CardDisplay> playerCards = BattleManager.Instance.GetAllyUnits(owner);
         HealthPointHandler enemyLeader = owner == Owner.Player ? BattleManager.Instance.enemyHealth : BattleManager.Instance.playerHealth;
         HealthPointHandler playerLeader = owner == Owner.Player ? BattleManager.Instance.playerHealth : BattleManager.Instance.enemyHealth;
+
+        CardDisplay sourceCard = context?.target?.card;
 
         switch (baseType)
         {
@@ -28,10 +30,8 @@ public static class TargetSelector
                 break;
 
             case "AllEnemies":
-                foreach (var item in enemyCards)
-                {
-                    results.Add(EffectTarget.FromCard(item));
-                }
+                foreach (var c in enemyCards.Where(c => !c.IsUntargetable()))
+                    results.Add(EffectTarget.FromCard(c));
                 break;
 
             case "RandomEnemies":
@@ -50,15 +50,15 @@ public static class TargetSelector
                 break;
 
             case "AllAllies":
-                foreach (var item in playerCards)
-                {
-                    if(!item.IsUntargetable())
-                        results.Add(EffectTarget.FromCard(item));
-                }
+                foreach (var item in playerCards.Where(item => !item.IsUntargetable()))
+                    results.Add(EffectTarget.FromCard(item));
                 break;
 
             case "Self":
-                results.Add(EffectTarget.FromLeader(playerLeader));
+                if (sourceCard != null)
+                    results.Add(EffectTarget.FromCard(sourceCard));
+                else
+                    Debug.LogWarning("[TargetSelector] Self target requested but no source card in context");
                 break;
 
             case "AreaAroundSelf":

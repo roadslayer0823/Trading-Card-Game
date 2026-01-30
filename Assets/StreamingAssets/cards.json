@@ -273,10 +273,10 @@
       "Damage"
     ],
     "skillValue": [
-      "15"
+      "6"
     ],
     "skillTarget": "AreaAroundSelf",
-    "skillText": "OnPlay: Deal 15 fire damage around self.",
+    "skillText": "OnPlay: Deal 6 fire damage around self.",
     "cardCount": "3"
   },
   {
@@ -297,8 +297,8 @@
       "8",
       "Stun(1)"
     ],
-    "skillTarget": "GroundEnemies",
-    "skillText": "OnPlay: Deal 8 damage and stun grounded enemies.",
+    "skillTarget": "AllEnemies",
+    "skillText": "OnPlay: Deal 8 damage and stun all enemies.",
     "cardCount": "3"
   },
   {
@@ -397,8 +397,8 @@
     "skillValue": [
       "12"
     ],
-    "skillTarget": "LineEnemies",
-    "skillText": "OnPlay: Deal 12 wind damage in a line.",
+    "skillTarget": "AllEnemies",
+    "skillText": "OnPlay: Deal 12 wind damage to all enemies.",
     "cardCount": "3"
   }
 ]

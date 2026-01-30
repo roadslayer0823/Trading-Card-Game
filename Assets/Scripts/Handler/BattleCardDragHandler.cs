@@ -72,7 +72,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
                     {
                         // 手动选择成功！传播以 targetOnSlot 为源
                         ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost);
-                        SpellExecutor.ExecuteSpellWithManualSource(cardDisplay, data, targetOnSlot);
+                        EffectExecutor.ExecuteSpellWithManualSource(cardDisplay, data, targetOnSlot);
 
                         Destroy(gameObject);  // 法术消耗
                         slot.isOccupied = false;  // 不占位

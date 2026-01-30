@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpellExecutor : MonoBehaviour
+public class EffectExecutor : MonoBehaviour
 {
     public static void ExecuteSpell(CardDisplay source, ModelDatas.CardData data)
     {
@@ -41,6 +41,21 @@ public class SpellExecutor : MonoBehaviour
             );
 
             effect.ApplyEffect(spellCard, context);
+        }
+    }
+
+    public static void TriggerMonsterEffect(CardDisplay sourceCard, ModelDatas.CardData data, EffectContext context)
+    {
+        if (data.skillEffect == null || data.skillEffect.Count == 0) return;
+
+        for (int i = 0; i < data.skillEffect.Count; i++)
+        {
+            string effectType = data.skillEffect[i];
+            string rawValue = data.skillValue[i];
+
+            EffectBase effect = EffectFactory.CreateEffect(effectType);
+            var targetContext = new EffectContext(sourceCard.owner, context.target, ParseEffectValue(rawValue), rawValue);
+            effect.ApplyEffect(sourceCard, targetContext);
         }
     }
 

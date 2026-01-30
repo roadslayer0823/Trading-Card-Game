@@ -61,6 +61,11 @@ public static class TargetSelector
                 results.Add(EffectTarget.FromLeader(playerLeader));
                 break;
 
+            case "AreaAroundSelf":
+                foreach (var c in playerCards.Where(c => !c.IsUntargetable())) results.Add(EffectTarget.FromCard(c));
+                foreach (var c in enemyCards.Where(c => !c.IsUntargetable())) results.Add(EffectTarget.FromCard(c));
+                break;
+
             case "Leader":
                 results.Add(EffectTarget.FromLeader(enemyLeader));
                 break;

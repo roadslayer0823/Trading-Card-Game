@@ -126,7 +126,7 @@ public class BattleManager : MonoBehaviour
         if (cardDisplay.cardType == spellType)
         {
             Debug.Log($"[BattleManager] Spell {cardDisplay.cardNameText.text} 正在发动效果...");
-            SpellExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardData());
+            EffectExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardData());
 
             var parentSlot = card.transform.parent;
             if (parentSlot != null)
@@ -137,6 +137,13 @@ public class BattleManager : MonoBehaviour
             Destroy(card.gameObject);
             return;
         }
+
+        if (cardDisplay.GetCardData().skillTiming == "OnSummon")
+        {
+            EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), 0, "");
+            EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
+        }
+
         else
         {
             Debug.Log($"[BattleManager] {cardDisplay.cardNameText.text} 是怪兽卡，进入场上。");
@@ -199,6 +206,12 @@ public class BattleManager : MonoBehaviour
 
             target.TakeDamage(finalAttackerDmg);
             attacker.TakeDamage(finalTargetDmg);
+
+            if (target.GetCardData().skillTiming == "OnHit")
+            {
+                EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(attacker), 0, "");  // attacker 作為 context
+                EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
+            }
 
             Debug.Log($"战斗结果: {attacker.cardName} [{string.Join(",", attacker.elementTags)}] → {target.cardName} [{string.Join(",", target.elementTags)}] 造成 {finalAttackerDmg} 伤害");
         }
@@ -277,6 +290,12 @@ public class BattleManager : MonoBehaviour
                 if(card.stunTurnRemaining <= 0)
                 {
                      card.ResetAttackState();
+                }
+
+                if (card.GetCardData().skillTiming == "PerTurn")
+                {
+                    EffectContext turnContext = new EffectContext(card.owner, EffectTarget.FromCard(card), 0, "");
+                    EffectExecutor.TriggerMonsterEffect(card, card.GetCardData(), turnContext);
                 }
             }
         }

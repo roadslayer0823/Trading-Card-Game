@@ -15,7 +15,7 @@ public class StatusEffect : EffectBase
         CardDisplay actualTarget = context.target.card;  // ← 这才是被施加状态的卡
 
         string raw = context.rawValue;
-        var match = Regex.Match(raw, @"(\w+)\((\d+)\)");
+        var match = Regex.Match(raw, @"(\w+)\s*\(\s*(\d+)\s*\)", RegexOptions.IgnoreCase);
         if (!match.Success)
         {
             Debug.LogWarning($"[StatusEffect] 格式错误: {raw}");

@@ -9,7 +9,7 @@ public class BuffEffect : EffectBase
         if (context.target?.type != EffectTargetType.Card || context.target.card == null) return;
 
         string raw = context.rawValue;
-        var atkMatch = Regex.Match(raw, @"(Damage|ATK)\+(\d+)", RegexOptions.IgnoreCase);
+        var atkMatch = Regex.Match(raw, @"(Damage|ATK)\s*\+(\d+)", RegexOptions.IgnoreCase);
         if (atkMatch.Success)
         {
             int value = int.Parse(atkMatch.Groups[2].Value);
@@ -20,7 +20,7 @@ public class BuffEffect : EffectBase
             return;
         }
 
-        var hpMatch = Regex.Match(raw, @"HP\+(\d+)", RegexOptions.IgnoreCase);
+        var hpMatch = Regex.Match(raw, @"HP\s*\+(\d+)", RegexOptions.IgnoreCase);
         if(hpMatch.Success)
         {
             int value = int.Parse(hpMatch.Groups[1].Value);

@@ -72,7 +72,7 @@ public class EffectExecutor : MonoBehaviour
 
                 foreach (var target in targets)
                 {
-                    var targetContext = new EffectContext(sourceCard.owner, context.target, ParseEffectValue(rawValue), rawValue);
+                    var targetContext = new EffectContext(sourceCard.owner, target, ParseEffectValue(rawValue), rawValue);
                     effect.ApplyEffect(sourceCard, targetContext);
                 }
             }

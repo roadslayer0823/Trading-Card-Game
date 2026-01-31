@@ -16,9 +16,9 @@
       "5"
     ],
     "skillTarget": "AllEnemies",
-    "skillText": "EndTurn: Deal 5 fire damage to all enemies.",
+    "skillText": "EachTurn: Deal 5 fire damage to all enemies.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "PerTurn",
@@ -29,7 +29,7 @@
           "5"
         ],
         "skillTarget": "AllEnemies",
-        "description": "EndTurn: Deal 5 fire damage to all enemies."
+        "description": "EachTurn: Deal 5 fire damage to all enemies."
       }
     ]
   },
@@ -50,9 +50,9 @@
       "5"
     ],
     "skillTarget": "Self",
-    "skillText": "EndTurn: Restore 5 HP.",
+    "skillText": "EachTurn: Restore 5 HP.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "PerTurn",
@@ -63,7 +63,7 @@
           "5"
         ],
         "skillTarget": "Self",
-        "description": "EndTurn: Restore 5 HP."
+        "description": "EachTurn: Restore 5 HP."
       }
     ]
   },
@@ -458,7 +458,7 @@
       "6"
     ],
     "skillTarget": "AreaAroundSelf",
-    "skillText": "OnPlay: Deal 6 fire damage around self.",
+    "skillText": "OnPlay: Deal 6 fire damage to all unit.",
     "cardCount": "3",
     "": "",
     "triggers": [
@@ -471,7 +471,7 @@
           "6"
         ],
         "skillTarget": "AreaAroundSelf",
-        "description": "OnPlay: Deal 6 fire damage around self."
+        "description": "OnPlay: Deal 6 fire damage to all unit."
       }
     ]
   },

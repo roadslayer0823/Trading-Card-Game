@@ -18,6 +18,8 @@ public static class TargetSelector
 
         CardDisplay sourceCard = context?.target?.card;
 
+        var validPool = enemyCards.Where(c => !c.IsUntargetable()).ToList();
+
         switch (baseType)
         {
             case "SingleEnemy":
@@ -34,10 +36,23 @@ public static class TargetSelector
                     results.Add(EffectTarget.FromCard(c));
                 break;
 
+            case "RandomEnemy":
+                Debug.Log($"[TargetSelector] RandomEnemy - owner={owner}, enemyCards.Count={enemyCards.Count}, validPool.Count={validPool.Count}");
+                if (validPool.Count > 0)
+                {
+                    var pick = validPool[Random.Range(0, validPool.Count)];
+                    results.Add(EffectTarget.FromCard(pick));
+                    Debug.Log($"[TargetSelector] RandomEnemy 選中: {pick.cardName}");
+                }
+                else
+                {
+                    Debug.LogWarning("[TargetSelector] RandomEnemy 沒有有效目標");
+                }
+            break;
+
             case "RandomEnemies":
             case "Enemies":
                 {
-                    var validPool = enemyCards.Where(c => !c.IsUntargetable()).ToList();
                     int count = Mathf.Min(number, enemyCards.Count);
                     var pool = new List<CardDisplay>(validPool);
                     for(int i = 0; i < count && pool.Count > 0; i++)

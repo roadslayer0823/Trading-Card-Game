@@ -219,7 +219,7 @@ public class BattleManager : MonoBehaviour
             {
                 if (trigger.skillTiming == "OnHit")
                 {
-                    EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(attacker), 0, "");  // attacker 作為 context
+                    EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(target), 0, "");  // attacker 作為 context
                     EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
                 }
             }
@@ -420,6 +420,13 @@ public class BattleManager : MonoBehaviour
                 cardDisplay.owner = Owner.Enemy;
                 fieldSlot.isOccupied = true;
                 cardDisplay.SetupCardUI(card);
+
+                if (cardDisplay != null && cardDisplay.GetCardData() != null)
+                {
+                    EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), 0, "");
+                    EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
+                    Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
+                }
 
                 EnemyLog($"Enemy played {card.cardName} to the field.");
                 break;

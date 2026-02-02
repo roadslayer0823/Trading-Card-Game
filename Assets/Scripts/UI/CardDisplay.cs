@@ -48,6 +48,7 @@ public class CardDisplay : MonoBehaviour
     [HideInInspector] public int maxHpPoint;
     [HideInInspector] public int tempAtkBuff = 0;
     [HideInInspector] public int tempHpBuff = 0;
+    [HideInInspector] public int damageReduction = 0;
     [HideInInspector] public int stunTurnRemaining = 0;
     [HideInInspector] public int untargetableTurnRemaining = 0;
     [HideInInspector] public int originalAtkPoint;
@@ -194,7 +195,8 @@ public class CardDisplay : MonoBehaviour
 
     public void TakeDamage(int dmg)
     {
-        hpPoint -= dmg;
+        int reducedDamage = Mathf.Max(0, dmg - damageReduction);
+        hpPoint -= reducedDamage;
 
         if (hpPoint <= 0)
         {
@@ -207,7 +209,7 @@ public class CardDisplay : MonoBehaviour
         }
 
         hpText.text = "HP: " + Mathf.Max(hpPoint, 0);
-        Debug.Log($"{cardName} take {dmg} damage, final hp is {hpPoint}");
+        Debug.Log($"{cardName} take {reducedDamage} damage, final hp is {hpPoint}");
     }
 
     public void UpdateCount(int newCount)

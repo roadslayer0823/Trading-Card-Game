@@ -120,7 +120,7 @@
     "skillTarget": "RandomEnemy",
     "skillText": "EachTurn: Deal 6 lightning damage to a random enemy.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "PerTurn",
@@ -348,28 +348,28 @@
     "atk": "2",
     "hp": "12",
     "skillType": "Passive",
-    "skillTiming": "PerTurn",
+    "skillTiming": "OnSummon",
     "skillEffect": [
-      "Buff"
+      "DamageReduction"
     ],
     "skillValue": [
-      "Defense+3"
+      "3"
     ],
     "skillTarget": "Self",
-    "skillText": "EachTurn: Take 3 less damage.",
+    "skillText": "OnSummon: Gain 3 Damage Reduction.",
     "cardCount": "3",
     "": "",
     "triggers": [
       {
-        "skillTiming": "PerTurn",
+        "skillTiming": "OnSummon",
         "skillEffect": [
-          "Buff"
+          "DamageReduction"
         ],
         "skillValue": [
-          "Defense+3"
+          "3"
         ],
         "skillTarget": "Self",
-        "description": "EachTurn: Take 3 less damage."
+        "description": "OnSummon: Gain 3 Damage Reduction."
       }
     ]
   },

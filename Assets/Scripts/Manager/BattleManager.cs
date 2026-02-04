@@ -145,7 +145,7 @@ public class BattleManager : MonoBehaviour
             {
                 if (trigger.skillTiming == "OnSummon")
                 {
-                    EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), 0, "");
+                    EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), null, 0, "");
                     EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
                 }
             }
@@ -219,7 +219,7 @@ public class BattleManager : MonoBehaviour
             {
                 if (trigger.skillTiming == "OnHit")
                 {
-                    EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(target), 0, "");  // attacker 作為 context
+                    EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(target), attacker, 0, "");  // attacker 作為 context
                     EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
                 }
             }
@@ -308,7 +308,7 @@ public class BattleManager : MonoBehaviour
                 {
                     if (trigger.skillTiming == "PerTurn" || trigger.skillTiming == "OnTurnEnd")
                     {
-                        EffectContext turnContext = new EffectContext(card.owner, null, 0, "");
+                        EffectContext turnContext = new EffectContext(card.owner, null, null, 0, "");
                         EffectExecutor.TriggerMonsterEffect(card, data, turnContext);
                     }
                 }
@@ -414,6 +414,7 @@ public class BattleManager : MonoBehaviour
 
                 GameObject cardObj = Instantiate(cardPrefab, slot);
                 CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
+                ModelDatas.CardData data = cardDisplay.GetCardData();
                 cardDisplay.cardCountText.gameObject.SetActive(false);
                 cardDisplay.SetCard(card);
                 cardDisplay.currentZone = CardZone.Field;
@@ -421,11 +422,17 @@ public class BattleManager : MonoBehaviour
                 fieldSlot.isOccupied = true;
                 cardDisplay.SetupCardUI(card);
 
-                if (cardDisplay != null && cardDisplay.GetCardData() != null)
+                if (cardDisplay != null && data != null)
                 {
-                    EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), 0, "");
-                    EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
-                    Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
+                    foreach(var trigger in data.triggers)
+                    {
+                        if(trigger.skillTiming == "OnSummon" || trigger.skillTiming == "OnPlay")
+                        {
+                            EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), null, 0, "");
+                            EffectExecutor.TriggerMonsterEffect(cardDisplay, data, summonContext);
+                            Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
+                        }
+                    }
                 }
 
                 EnemyLog($"Enemy played {card.cardName} to the field.");

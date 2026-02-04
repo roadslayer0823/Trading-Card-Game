@@ -3,14 +3,16 @@ public class EffectContext
 {
     public Owner sourceOwner;
     public EffectTarget target;
+    public CardDisplay attacker;
     public int value;
     public string rawValue;
     public string statusName;
     public int duration;
-    public EffectContext(Owner sourceOwner, EffectTarget target, int value = 0, string statusName = "", int duration = 0, string rawValue = "")
+    public EffectContext(Owner sourceOwner, EffectTarget target, CardDisplay attacker = null, int value = 0, string statusName = "", int duration = 0, string rawValue = "")
     {
         this.sourceOwner = sourceOwner;
         this.target = target;
+        this.attacker = attacker;
         this.value = value;
         this.rawValue = rawValue;
         this.statusName = statusName;

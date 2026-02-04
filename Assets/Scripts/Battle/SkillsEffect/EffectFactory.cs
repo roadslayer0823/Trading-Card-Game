@@ -12,6 +12,7 @@ public static class EffectFactory
             "Status" => new StatusEffect(),
             "Buff" => new BuffEffect(),
             "DamageReduction" => new DamageReductionEffect(),
+            "LifeSteal" => new LifeStealEffect(),
             _ => throw new ArgumentException($"Unknown effect type: {effectType}")
         };
     }

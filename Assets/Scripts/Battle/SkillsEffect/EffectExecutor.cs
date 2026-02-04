@@ -17,7 +17,7 @@ public class EffectExecutor : MonoBehaviour
                     string rawValue = trigger.skillValue[i];
 
                     EffectBase effect = EffectFactory.CreateEffect(effectType);
-                    var context = new EffectContext(source.owner, target, ParseEffectValue(rawValue), rawValue: rawValue);
+                    var context = new EffectContext(source.owner, target, null, ParseEffectValue(rawValue), rawValue: rawValue);
                     effect.ApplyEffect(source, context);
                 }
             }
@@ -72,7 +72,7 @@ public class EffectExecutor : MonoBehaviour
 
                 foreach (var target in targets)
                 {
-                    var targetContext = new EffectContext(sourceCard.owner, target, ParseEffectValue(rawValue), rawValue);
+                    var targetContext = new EffectContext(sourceCard.owner, target, null, ParseEffectValue(rawValue), rawValue);
                     effect.ApplyEffect(sourceCard, targetContext);
                 }
             }

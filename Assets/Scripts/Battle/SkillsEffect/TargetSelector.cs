@@ -64,6 +64,18 @@ public static class TargetSelector
                 }
                 break;
 
+            case "HitTarget":
+                if (context.attacker != null)
+                {
+                    results.Add(EffectTarget.FromCard(context.attacker));
+                    Debug.Log($"[TargetSelector] HitTarget 選中攻擊者: {context.attacker.cardName}");
+                }
+                else
+                {
+                    Debug.LogWarning("[TargetSelector] HitTarget 找不到攻擊者 (context.target null)");
+                }
+                break;
+
             case "AllAllies":
                 foreach (var item in playerCards.Where(item => !item.IsUntargetable()))
                     results.Add(EffectTarget.FromCard(item));

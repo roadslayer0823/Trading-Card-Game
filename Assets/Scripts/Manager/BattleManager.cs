@@ -172,7 +172,7 @@ public class BattleManager : MonoBehaviour
         if (attacker.isFrozen && attacker.atkPoint <= 0)
         {
             Debug.Log($"{attacker.cardName} 被冰冻，攻击力为0，无法造成伤害！");
-            attacker.SetIdleAfterAttack(); // 还是要标记已攻击 testing
+            attacker.SetIdleAfterAttack(); // 还是要标记已攻击
             return;
         }
 

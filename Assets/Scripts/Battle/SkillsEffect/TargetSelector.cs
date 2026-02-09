@@ -5,7 +5,7 @@ using System.Linq;
 
 public static class TargetSelector
 {
-    public static List<EffectTarget> GetTargets(string targetType, Owner owner, EffectContext context = null)
+    public static List<EffectTarget> GetTargets(string targetType, Owner owner, EffectContext context = null, CardDisplay sourceCard = null)
     {
         List<EffectTarget> results = new();
         string baseType = Regex.Replace(targetType, @"\([^)]*\)", "");
@@ -15,8 +15,6 @@ public static class TargetSelector
         List<CardDisplay> playerCards = BattleManager.Instance.GetAllyUnits(owner);
         HealthPointHandler enemyLeader = owner == Owner.Player ? BattleManager.Instance.enemyHealth : BattleManager.Instance.playerHealth;
         HealthPointHandler playerLeader = owner == Owner.Player ? BattleManager.Instance.playerHealth : BattleManager.Instance.enemyHealth;
-
-        CardDisplay sourceCard = context?.target?.card;
 
         var validPool = enemyCards.Where(c => !c.IsUntargetable()).ToList();
 
@@ -79,6 +77,41 @@ public static class TargetSelector
             case "AllAllies":
                 foreach (var item in playerCards.Where(item => !item.IsUntargetable()))
                     results.Add(EffectTarget.FromCard(item));
+                break;
+
+            case "NearbyAllies":
+                if (sourceCard == null)
+                {
+                    Debug.LogError("[NearbyAllies] sourceCard 為 null，無法計算相鄰");
+                    return results;
+                }
+                List<CardDisplay> allies = BattleManager.Instance.GetAllyUnits(owner);
+
+                FieldSlot selfSlot = sourceCard.GetComponentInParent<FieldSlot>();
+                if(selfSlot == null || selfSlot.slotIndex < 0)
+                {
+                    Debug.LogWarning("[TargetSelector] NearbyAllies 找不到自己 slotIndex，跳過");
+                    break;
+                }
+
+                int selfIndex = selfSlot.slotIndex;
+                foreach(var ally in allies)
+                {
+                    FieldSlot allySlot = ally.GetComponentInParent<FieldSlot>();
+                    if (allySlot == null || allySlot.slotIndex < 0) continue;
+
+                    int allyIndex = allySlot.slotIndex;
+                    if(Mathf.Abs(allyIndex - selfIndex) == 1)
+                    {
+                        results.Add(EffectTarget.FromCard(ally));
+                        Debug.Log($"[TargetSelector] NearbyAllies 選中相鄰盟友: {ally.cardName} (索引 {allyIndex})");
+                    }
+                }
+
+                if (results.Count == 0)
+                {
+                    Debug.Log("[TargetSelector] NearbyAllies 沒有相鄰盟友");
+                }
                 break;
 
             case "Self":

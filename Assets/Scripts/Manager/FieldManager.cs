@@ -12,8 +12,15 @@ public class FieldManager : MonoBehaviour
     {
         for (int i = 0; i < slotCount; i++) 
         {
-            GameObject slot = Instantiate(slotPrefab, fieldParent);
-            slot.name = "FieldSlot_" + (i + 1);
+            GameObject slotObj = Instantiate(slotPrefab, fieldParent);
+            slotObj.name = "FieldSlot_" + (i + 1);
+
+            FieldSlot slot = slotObj.GetComponent<FieldSlot>();
+            if(slot != null)
+            {
+                slot.slotIndex = i;
+                Debug.Log($"Slot {slotObj.name} 索引設為 {i}");
+            }
         }
     }
 }

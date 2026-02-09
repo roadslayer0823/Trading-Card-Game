@@ -56,7 +56,7 @@ public class EffectExecutor : MonoBehaviour
             if (trigger.skillEffect == null || trigger.skillEffect.Count == 0) return;
             Debug.Log($"[TriggerMonsterEffect] {sourceCard.cardName} 觸發 {trigger.skillTiming}，目標類型: {trigger.skillTarget}，sourceOwner: {sourceCard.owner}");
 
-            List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, sourceCard.owner, context);
+            List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, sourceCard.owner, context, sourceCard);
             if(trigger.skillTarget == "Self" && targets.Count == 0 && sourceCard != null)
             {
                 targets.Add(EffectTarget.FromCard(sourceCard));

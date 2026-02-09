@@ -146,26 +146,25 @@
     "skillType": "OnSummon",
     "skillTiming": "OnSummon",
     "skillEffect": [
-      "Status"
+      "DrawCard"
     ],
     "skillValue": [
-      "Spread(1)"
+      "1"
     ],
-    "skillTarget": "Adjacent",
-    "skillText": "OnSummon: Spread statuses to adjacent units.",
+    "skillTarget": "Self",
+    "skillText": "OnSummon: Draw 1 card.",
     "cardCount": "3",
-    "": "",
     "triggers": [
       {
         "skillTiming": "OnSummon",
         "skillEffect": [
-          "Status"
+          "DrawCard"
         ],
         "skillValue": [
-          "Spread(1)"
+          "1"
         ],
-        "skillTarget": "Adjacent",
-        "description": "OnSummon: Spread statuses to adjacent units."
+        "skillTarget": "Self",
+        "description": "OnSummon: Draw 1 card."
       }
     ]
   },

@@ -67,12 +67,14 @@ public class EffectExecutor : MonoBehaviour
             for (int i = 0; i < trigger.skillEffect.Count; i++)
             {
                 string effectType = trigger.skillEffect[i];
+                Debug.Log($"[TriggerMonsterEffect] 嘗試建立效果: {effectType}");
                 string rawValue = trigger.skillValue[i];
                 EffectBase effect = EffectFactory.CreateEffect(effectType);
 
                 foreach (var target in targets)
                 {
-                    var targetContext = new EffectContext(sourceCard.owner, target, null, ParseEffectValue(rawValue), rawValue);
+                    var targetContext = new EffectContext(sourceCard.owner, target, null, value: ParseEffectValue(rawValue), rawValue: rawValue);
+                    Debug.Log($"[TriggerMonsterEffect] 執行效果 {effectType} 於目標 {target.card?.cardName ?? "無卡"}");
                     effect.ApplyEffect(sourceCard, targetContext);
                 }
             }

@@ -6,6 +6,10 @@ public class StatusEffect : EffectBase
 {
     public override void ApplyEffect(CardDisplay source, EffectContext context)
     {
+        if (string.IsNullOrWhiteSpace(context.rawValue))
+        {
+            Debug.LogWarning($"[StatusEffect] rawValue 為空！來源: {source.cardName}，目標: {context.target?.card?.cardName}");
+        }
         if (context.target.type != EffectTargetType.Card || context.target.card == null)
         {
             Debug.LogWarning("[StatusEffect] 目标不是卡牌，跳过");
@@ -31,7 +35,7 @@ public class StatusEffect : EffectBase
         switch (statusType)
         {
             case "Freeze":
-                actualTarget.ApplyFreeze(duration);
+                actualTarget.ApplyFreeze(duration, actualTarget);
                 break;
             case "Stun":
                 actualTarget.ApplyStun(duration);

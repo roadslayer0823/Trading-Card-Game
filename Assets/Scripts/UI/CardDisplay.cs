@@ -157,8 +157,9 @@ public class CardDisplay : MonoBehaviour
         }
     }
 
-    public void ApplyFreeze(int duration)
+    public void ApplyFreeze(int duration, CardDisplay targetCard)
     {
+        Debug.Log($"[ApplyFreeze] 開始凍結 {targetCard.cardName} {duration} 回合");
         if (!isFrozen)
         {
             originalAtkPoint = atkPoint;  // Save original ATK
@@ -167,20 +168,21 @@ public class CardDisplay : MonoBehaviour
         }
 
         isFrozen = true;
-        frozenTurnRemaining = Mathf.Max(frozenTurnRemaining, duration);
+        frozenTurnRemaining = Mathf.Max(frozenTurnRemaining, duration + 1);
         GetComponent<CanvasGroup>().alpha = 0.5f;
+        Debug.Log($"[ApplyFreeze] 完成：{targetCard.cardName} 被凍結 {frozenTurnRemaining} 回合，ATK = 0");
     }
 
     public void ApplyStun(int duration)
     {
         isAttack = false;
-        stunTurnRemaining = Mathf.Max(stunTurnRemaining, duration);
+        stunTurnRemaining = Mathf.Max(stunTurnRemaining, duration + 1);
         GetComponent<CanvasGroup>().alpha = 0.5f;
     }
 
     public void ApplyUntargetable(int duration)
     {
-        untargetableTurnRemaining = Mathf.Max(untargetableTurnRemaining, duration);
+        untargetableTurnRemaining = Mathf.Max(untargetableTurnRemaining, duration + 1);
         GetComponent<CanvasGroup>().alpha = 0.7f;
         Debug.Log($"{cardName} 獲得 Untargetable（無法被選為目標），持續 {duration} 回合");
     }

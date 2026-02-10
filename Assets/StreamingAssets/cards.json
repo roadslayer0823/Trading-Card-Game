@@ -86,7 +86,7 @@
     "skillTarget": "HitTarget",
     "skillText": "OnHit: Freeze the enemy for 1 turn.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "OnHit",
@@ -154,6 +154,7 @@
     "skillTarget": "Self",
     "skillText": "OnSummon: Draw 1 card.",
     "cardCount": "3",
+    "": "",
     "triggers": [
       {
         "skillTiming": "OnSummon",
@@ -357,7 +358,7 @@
     "skillTarget": "Self",
     "skillText": "OnSummon: Gain 3 Damage Reduction.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "OnSummon",
@@ -391,7 +392,7 @@
     "skillTarget": "NearbyAllies",
     "skillText": "EachTurn: Heal nearby allies 3 HP.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "PerTurn",
@@ -425,7 +426,7 @@
     "skillTarget": "HitTarget",
     "skillText": "OnHit: Steal 2 HP from the enemy.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "OnHit",
@@ -459,7 +460,7 @@
     "skillTarget": "AreaAroundSelf",
     "skillText": "OnPlay: Deal 6 fire damage to all unit.",
     "cardCount": "3",
-    "": "",
+    "": "Done",
     "triggers": [
       {
         "skillTiming": "OnUse",

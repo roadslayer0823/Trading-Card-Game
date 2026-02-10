@@ -1,6 +1,7 @@
 using UnityEngine;
 public class EffectContext
 {
+    //是使用来传送攻击者或者是预设目标
     public Owner sourceOwner;
     public EffectTarget target;
     public CardDisplay attacker;

@@ -32,10 +32,13 @@ public class CardDisplay : MonoBehaviour
     public TMP_Text atkText = null;
     public TMP_Text hpText = null;
     public TMP_Text cardCountText = null;
+    public Image cardBackground = null;
     public Image elementIcon = null;
     public Image cardArtImage = null;
     public CardZone currentZone = CardZone.None;
     public Owner owner = Owner.None;
+    public Color monsterCardColor;
+    public Color spellCardColor;
 
     [HideInInspector] public PanelType currentPanel;
     [HideInInspector] public string cardName;
@@ -93,6 +96,7 @@ public class CardDisplay : MonoBehaviour
         cardCountText.text = "x" + currentCount.ToString();
 
         cardArtImage.sprite = data.cardSprite;
+        cardBackground.color = data.type == "Monster" ? monsterCardColor : spellCardColor;
 
         skillText.text = data.skillText;
         SetElementColor(data.element);

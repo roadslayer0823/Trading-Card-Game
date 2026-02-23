@@ -91,8 +91,8 @@ public class CardDisplay : MonoBehaviour
     {
         cardNameText.text = cardName;
         costText.text = data.cost.ToString();
-        atkText.text = "ATK: " + atkPoint.ToString();
-        hpText.text = "HP: " + hpPoint.ToString();
+        atkText.text = atkPoint.ToString();
+        hpText.text = hpPoint.ToString();
         cardCountText.text = "x" + currentCount.ToString();
 
         cardArtImage.sprite = data.cardSprite;
@@ -100,8 +100,6 @@ public class CardDisplay : MonoBehaviour
 
         skillText.text = data.skillText;
         SetElementColor(data.element);
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(stateArea);
     }
 
     public void UpdateDisplay()
@@ -129,7 +127,7 @@ public class CardDisplay : MonoBehaviour
             {
                 isFrozen = false;
                 atkPoint = originalAtkPoint;
-                atkText.text = "ATK: " + atkPoint;
+                atkText.text = atkPoint.ToString();
                 Debug.Log($"{cardName} 的冰冻状态解除，攻击力恢复为 {atkPoint}。");
             }
         }
@@ -168,7 +166,7 @@ public class CardDisplay : MonoBehaviour
         {
             originalAtkPoint = atkPoint;  // Save original ATK
             atkPoint = 0;
-            atkText.text = "ATK: 0";
+            atkText.text = "0";
         }
 
         isFrozen = true;
@@ -195,7 +193,7 @@ public class CardDisplay : MonoBehaviour
     {
         int newMaxHp = maxHpPoint + tempHpBuff;
         hpPoint = Mathf.Min(hpPoint + amount, newMaxHp);
-        hpText.text = $"HP: {hpPoint} (+{tempHpBuff})";
+        hpText.text = $"{hpPoint} (+{tempHpBuff})";
         Debug.Log($"{cardName} 恢复 {amount} 点HP，当前HP为 {hpPoint}/{newMaxHp}");
     }
 
@@ -214,7 +212,7 @@ public class CardDisplay : MonoBehaviour
             Destroy(gameObject);
         }
 
-        hpText.text = "HP: " + Mathf.Max(hpPoint, 0);
+        hpText.text = Mathf.Max(hpPoint, 0).ToString();
         Debug.Log($"{cardName} take {reducedDamage} damage, final hp is {hpPoint}");
     }
 

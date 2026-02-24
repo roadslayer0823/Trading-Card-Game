@@ -104,7 +104,6 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
 
                         isLocked = true;
                         cardDisplay.currentZone = CardZone.Field;
-                        cardDisplay.UpdateDisplay();
                         BattleManager.Instance.PlayCard(this);
 
                         if (cardDisplay.cardType == "Monster")

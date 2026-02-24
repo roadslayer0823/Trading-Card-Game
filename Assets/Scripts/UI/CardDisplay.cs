@@ -61,6 +61,23 @@ public class CardDisplay : MonoBehaviour
 
     private ModelDatas.CardData cardData;
     private int frozenTurnRemaining = 0;
+
+    private void Update()
+    {
+        if (owner == Owner.Player)
+        {
+            if (currentZone == CardZone.Hand)
+            {
+                bool canPlay = ManaManager.Instance.CanAfford(cardData.cost, owner);
+                SetGreyedOut(!canPlay);
+            }
+            else
+            {
+                SetGreyedOut(false);
+            }
+        }
+    }
+
     private static readonly Dictionary<string, Color32> elementColors = new()
     {
         { "fire",  new Color32(255, 80, 80, 255) },
@@ -100,22 +117,6 @@ public class CardDisplay : MonoBehaviour
 
         skillText.text = data.skillText;
         SetElementColor(data.element);
-    }
-
-    public void UpdateDisplay()
-    {
-        if (owner == Owner.Player)
-        {
-            if (currentZone == CardZone.Hand)
-            {
-                bool canPlay = ManaManager.Instance.CanAfford(cardData.cost, owner);
-                SetGreyedOut(!canPlay);
-            }
-            else
-            {
-                SetGreyedOut(false);
-            }
-        }
     }
 
    public void UpdateStatusAtTurnEnd()
@@ -267,15 +268,6 @@ public class CardDisplay : MonoBehaviour
     private void SetGreyedOut(bool isGreyed)
     {
         GetComponent<CanvasGroup>().alpha = isGreyed ? 0.5f : 1f;
-    }
-
-    private void OnEnable()
-    {
-        ManaManager.OnManaChanged += UpdateDisplay;
-    }
-    private void OnDisable()
-    {
-        ManaManager.OnManaChanged -= UpdateDisplay;
     }
 
     public bool IsUntargetable()

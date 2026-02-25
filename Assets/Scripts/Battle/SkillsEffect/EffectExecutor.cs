@@ -8,7 +8,6 @@ public class EffectExecutor : MonoBehaviour
         foreach(var trigger in data.triggers)
         {
             List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, source.owner);
-
             foreach (var target in targets)
             {
                 for(int i = 0; i < trigger.skillEffect.Count; i++)

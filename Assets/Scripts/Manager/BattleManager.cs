@@ -127,13 +127,13 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log($"[BattleManager] Spell {cardDisplay.cardNameText.text} 正在发动效果...");
             EffectExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardData());
-
             var parentSlot = card.transform.parent;
             if (parentSlot != null)
             {
                 FieldSlot fs = parentSlot.GetComponent<FieldSlot>();
                 if (fs != null) fs.isOccupied = false;
             }
+
             Destroy(card.gameObject);
             return;
         }

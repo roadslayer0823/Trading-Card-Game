@@ -1,4 +1,4 @@
-﻿using Unity.VisualScripting;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -52,72 +52,39 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
     public void OnEndDrag(PointerEventData eventData)
     {
         if (isLocked) return;
-        canvasGroup.blocksRaycasts = true;
 
-        bool isPlaced = false;
+        canvasGroup.blocksRaycasts = true;
+        bool successfullyPlaced;
 
         CardDisplay cardDisplay = GetComponent<CardDisplay>();
-        ModelDatas.CardData data = cardDisplay.GetCardData();
+        var data = cardDisplay.GetCardData();
 
-        if (eventData.pointerEnter != null)
+        // 沒有拖到任何有效位置 → 直接回手牌
+        if (eventData.pointerEnter == null)
         {
-            FieldSlot slot = eventData.pointerEnter.GetComponentInParent<FieldSlot>();  // 支持拖到卡上
-            if (slot != null)
-            {
-                // 检查是否是法术且需要手动选源 (SingleAlly)
-                foreach(var trigger in data.triggers)
-                {
-                    if (cardDisplay.cardType == "Spell" && trigger.skillTarget == "SingleAlly")
-                    {
-                        CardDisplay targetOnSlot = slot.GetComponentInChildren<CardDisplay>();
-                        if (targetOnSlot != null && targetOnSlot.owner == cardDisplay.owner && targetOnSlot.cardType == "Monster")
-                        {
-                            // 手动选择成功！传播以 targetOnSlot 为源
-                            ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost);
-                            EffectExecutor.ExecuteSpellWithManualSource(cardDisplay, data, targetOnSlot);
-
-                            Destroy(gameObject);  // 法术消耗
-                            slot.isOccupied = false;  // 不占位
-                            isPlaced = true;
-                        }
-                        else
-                        {
-                            // 拖到空位或敌方怪兽 → 无效
-                            ReturnToHand();
-                        }
-                    }
-                    else
-                    {
-                        // 正常出牌逻辑（怪兽或不需要手动选的法术）
-                        if (!ManaManager.Instance.CanAfford(data.cost, cardDisplay.owner) || slot.isOccupied)
-                        {
-                            ReturnToHand();
-                            Destroy(placeholder);
-                            return;
-                        }
-
-                        ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost);
-                        slot.isOccupied = true;
-                        transform.SetParent(slot.transform, false);
-                        rectTransform.localScale = Vector3.one;
-                        rectTransform.localPosition = Vector3.zero;
-
-                        isLocked = true;
-                        cardDisplay.currentZone = CardZone.Field;
-                        BattleManager.Instance.PlayCard(this);
-
-                        if (cardDisplay.cardType == "Monster")
-                        {
-                            this.AddComponent<AttackDragHandler>();
-                        }
-
-                        isPlaced = true;
-                    }
-                }
-            }
+            ReturnToHand();
+            Destroy(placeholder);
+            return;
         }
 
-        if (!isPlaced)
+        FieldSlot slot = eventData.pointerEnter.GetComponentInParent<FieldSlot>();
+        if (slot == null)
+        {
+            ReturnToHand();
+            Destroy(placeholder);
+            return;
+        }
+
+        if (IsManualTargetSpell(cardDisplay, data))
+        {
+            successfullyPlaced = TryPlayManualTargetSpell(cardDisplay, data, slot);
+        }
+        else
+        {
+            successfullyPlaced = TryPlayNormalCard(cardDisplay, data, slot);
+        }
+
+        if (!successfullyPlaced)
         {
             ReturnToHand();
         }
@@ -125,7 +92,109 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         Destroy(placeholder);
     }
 
-    private void ReturnToHand()
+    private bool IsManualTargetSpell(CardDisplay cardDisplay, ModelDatas.CardData data)
+    {
+        if (cardDisplay.cardType != "Spell") return false;
+
+        foreach (var trigger in data.triggers)
+        {
+            if (trigger.skillTarget == "SingleAlly")
+                return true;
+        }
+        return false;
+    }
+
+    private bool TryPlayManualTargetSpell(CardDisplay cardDisplay, ModelDatas.CardData data, FieldSlot slot)
+    {
+        CardDisplay target = slot.GetComponentInChildren<CardDisplay>();
+
+        // 有目標 → 嘗試扣魔力
+        if (!ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost))
+        {
+            // SpendMana 內部已經顯示 "Insufficient Mana" 了，這裡不用再顯示
+            return false;
+        }
+
+        if (target == null || target.owner != cardDisplay.owner || target.cardType != "Monster")
+        {
+            FeedbackManager.Instance.ShowFeedback(CardPlayError.NoValidTarget);
+            ManaManager.Instance.ReturnMana(cardDisplay.owner, data.cost);
+            return false;
+        }
+
+        // 成功扣魔 → 執行效果
+        EffectExecutor.ExecuteSpellWithManualSource(cardDisplay, data, target);
+        Destroy(gameObject);
+        // 注意：法術不占位，所以不設 slot.isOccupied = true
+
+        return true;
+    }
+
+    private bool TryPlayNormalCard(CardDisplay cardDisplay, ModelDatas.CardData data, FieldSlot slot)
+    {
+        // 先檢查位置是否合法
+        if (slot.isOccupied)
+        {
+            FeedbackManager.Instance.ShowFeedback(CardPlayError.InvalidZone);
+            return false;
+        }
+
+        // 所有前置檢查通過 → 才扣魔力
+        if (!ManaManager.Instance.SpendMana(cardDisplay.owner, data.cost))
+        {
+            return false;
+        }
+
+        // 如果是法術，檢查自動目標是否有效（在扣魔力之前！）
+        if (cardDisplay.cardType == "Spell" && !HasValidAutoTargets(cardDisplay, data))
+        {
+            FeedbackManager.Instance.ShowFeedback(CardPlayError.NoValidTarget);
+            ManaManager.Instance.ReturnMana(cardDisplay.owner, data.cost);
+            return false;
+        }
+
+        // 成功扣魔 → 放置到場上
+        slot.isOccupied = true;
+        transform.SetParent(slot.transform, false);
+        rectTransform.localScale = Vector3.one;
+        rectTransform.localPosition = Vector3.zero;
+        isLocked = true;
+        cardDisplay.currentZone = CardZone.Field;
+
+        // 呼叫 PlayCard 執行 OnSummon 或法術效果
+        BattleManager.Instance.PlayCard(this);
+
+        if (cardDisplay.cardType == "Monster")
+        {
+            gameObject.AddComponent<AttackDragHandler>();
+        }
+
+        return true;
+    }
+
+    private bool HasValidAutoTargets(CardDisplay cardDisplay, ModelDatas.CardData data)
+    {
+        if (cardDisplay.cardType != "Spell") return true;  // 怪獸不需要檢查目標
+
+        foreach (var trigger in data.triggers)
+        {
+            string targetType = trigger.skillTarget;
+
+            // 跳過手動選目標的類型（已經在 TryPlayManualTargetSpell 處理）
+            if (targetType == "SingleAlly") continue;
+
+            List<EffectTarget> targets = TargetSelector.GetTargets(targetType, cardDisplay.owner, context: null,sourceCard: cardDisplay);
+
+            if (targets.Count == 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void ReturnToHand()
     {
         int index = placeholder != null ? placeholder.transform.GetSiblingIndex() : originalParent.childCount;
         transform.SetParent(originalParent, false);

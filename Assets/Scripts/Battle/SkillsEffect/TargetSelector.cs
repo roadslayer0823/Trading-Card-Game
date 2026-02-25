@@ -177,4 +177,10 @@ public static class TargetSelector
         var m = Regex.Match(input, @"\((\d+)\)");
         return m.Success ? int.Parse(m.Groups[1].Value) : 1;
     }
+
+    public static bool HasValidTargets(string targetType, Owner owner, EffectContext context = null, CardDisplay sourceCard = null)
+    {
+        var targets = GetTargets(targetType, owner, context, sourceCard);
+        return targets.Count > 0;
+    }
 }

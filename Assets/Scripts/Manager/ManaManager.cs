@@ -70,12 +70,24 @@ public class ManaManager : MonoBehaviour
 
     public bool SpendMana(Owner owner, int amount)
     {
-        if (currentMana[owner] < amount) return false;
+        if (currentMana[owner] < amount)
+        {
+            FeedbackManager.Instance.ShowFeedback(CardPlayError.InsufficientMana);
+            return false;
+        } 
         currentMana[owner] -= amount;
         UpdateManaUI(owner);
         NotifyManaChange();
         return true;
     }
+
+    public void ReturnMana(Owner owner, int amount)
+    {
+        currentMana[owner] += amount;
+        UpdateManaUI(owner);
+        NotifyManaChange();
+    }
+
     public bool CanAfford(int cost, Owner owner)
     {
         return currentMana[owner] >= cost;

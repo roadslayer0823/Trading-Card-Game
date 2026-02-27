@@ -41,6 +41,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         placeholder.transform.SetSiblingIndex(transform.GetSiblingIndex());
 
         transform.SetParent(transform.root, true);
+        GetComponent<CardHoverEffect>()?.DisableHover();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -90,6 +91,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         }
 
         Destroy(placeholder);
+        GetComponent<CardHoverEffect>()?.DisableHover();
     }
 
     private bool IsManualTargetSpell(CardDisplay cardDisplay, ModelDatas.CardData data)

@@ -29,6 +29,7 @@ public class HealthPointHandler : MonoBehaviour
         UpdateUI(maxHealth, currentHealth);
         if (currentHealth == 0)
         {
+            BattleManager.Instance.CheckGameOver();
             Debug.Log($"{owner} lose");
         }
     }

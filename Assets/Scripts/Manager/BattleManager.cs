@@ -27,6 +27,10 @@ public class BattleManager : MonoBehaviour
     [Header("Setting")]
     public TurnState currentTurn = TurnState.Player;
 
+    [Header("Game Over")]
+    public bool gameEnded = false;
+    public GameObject gameOverPanel;
+
     private string monsterType = "Monster";
     private string spellType = "Spell";
     private int startingHandSize = 5;
@@ -37,15 +41,36 @@ public class BattleManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    private void Update()
+    {
+        if (gameEnded)
+        {
+            if (Input.GetMouseButtonDown(0)) return;
+            return;
+        }
+    }
+
     private void Start()
+    {
+        StartGame();
+    }
+
+    public void StartGame()
     {
         DeckManager.Instance.LoadDeck();
         DeckManager.Instance.GeneratePlayerDeck();
         DeckManager.Instance.GenerateEnemyDeck();
+        ManaManager.Instance.ResetMana();
         playerHealth.Initialize(startingHP);
         enemyHealth.Initialize(startingHP);
+        gameOverPanel.SetActive(false);
 
         StartBattle();
+    }
+
+    public void ReturnToMainMenu()
+    {
+        UIManager.Instance.GotoMainScene();
     }
 
     private void StartBattle()
@@ -91,10 +116,42 @@ public class BattleManager : MonoBehaviour
         if (currentTurn == TurnState.Player)
         {
             StartEnemyTurn();
+            CheckGameOver();
         }
         else
         {
             StartPlayerTurn();
+            CheckGameOver();
+        }
+    }
+
+    public void CheckGameOver()
+    {
+        if (gameEnded) return;
+
+        if(playerHealth.currentHealth <= 0)
+        {
+            gameEnded = true;
+            ShowGameOver(false);
+            return;
+        }
+
+        if(enemyHealth.currentHealth <= 0)
+        {
+            gameEnded = true;
+            ShowGameOver(true);
+            return;
+        }
+    }
+
+    private void ShowGameOver(bool isWin)
+    {
+        if(gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+
+            TextMeshProUGUI titleText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>();
+            titleText.text = isWin ? "You Win!" : "You Lose!";
         }
     }
 
@@ -227,6 +284,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log($"战斗结果: {attacker.cardName} [{string.Join(",", attacker.elementTags)}] → {target.cardName} [{string.Join(",", target.elementTags)}] 造成 {finalAttackerDmg} 伤害");
         }
         attacker.SetIdleAfterAttack();
+        CheckGameOver();
     }
 
     private int CalculateElementReaction(CardDisplay attacker, CardDisplay defender, int baseDamage)
@@ -355,6 +413,7 @@ public class BattleManager : MonoBehaviour
     //Enemy AI Behavior
     private IEnumerator EnemyTurnRoutine()
     {
+        if (gameEnded) yield break;
         yield return new WaitForSeconds(1f);
         EnemyPlayCard();
         yield return new WaitForSeconds(1f);
@@ -385,6 +444,7 @@ public class BattleManager : MonoBehaviour
         var card = candidates[Random.Range(0, candidates.Count)];
 
         if (!ManaManager.Instance.CanAfford(card.cost, Owner.Enemy)) return;
+
 
         foreach (Transform slot in enemyFieldZone)
         {

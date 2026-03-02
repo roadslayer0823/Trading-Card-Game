@@ -29,6 +29,11 @@ public class ManaManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
+        ResetMana();
+    }
+
+    public void ResetMana()
+    {
         maxMana[Owner.Player] = 0;
         currentMana[Owner.Player] = 0;
 

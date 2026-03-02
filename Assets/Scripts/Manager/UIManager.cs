@@ -37,4 +37,9 @@ public class UIManager : MonoBehaviour
     {
         SceneManager.LoadScene("BattleScene");
     }
+
+    public void GotoMainScene()
+    {
+        SceneManager.LoadScene("MainScene");
+    }
 }

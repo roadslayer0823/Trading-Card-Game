@@ -15,7 +15,7 @@ public class BuffEffect : EffectBase
             int value = int.Parse(atkMatch.Groups[2].Value);
             CardDisplay targetCard = context.target.card;
             targetCard.tempAtkBuff += value;
-            targetCard.atkText.text = $"ATK: {targetCard.atkPoint + targetCard.tempAtkBuff}";
+            targetCard.atkText.text = $"{targetCard.atkPoint + targetCard.tempAtkBuff}";
             Debug.Log($"[Buff] {targetCard.cardName} 攻击力 +{value} (当前: {targetCard.atkPoint + targetCard.tempAtkBuff})");
             return;
         }
@@ -28,7 +28,7 @@ public class BuffEffect : EffectBase
             targetCard.tempHpBuff += value;
             targetCard.maxHpPoint += value;
             targetCard.hpPoint = targetCard.maxHpPoint;
-            targetCard.hpText.text = $"HP: {targetCard.hpPoint} (+{targetCard.tempHpBuff})";  // UI 显示加成
+            targetCard.hpText.text = $"{targetCard.hpPoint} (+{targetCard.tempHpBuff})";  // UI 显示加成
             LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
             Debug.Log($"[Buff HP] {targetCard.cardName} HP +{value} (新上限 {targetCard.maxHpPoint})");
             return;

@@ -438,65 +438,127 @@ public class BattleManager : MonoBehaviour
         var enemyhand = DeckManager.Instance.enemyHand;
         if (enemyhand.Count == 0) return;
 
-        var candidates = enemyhand.FindAll(c => c.type == monsterType);
-        if (candidates.Count == 0) return;
-
-        var card = candidates[Random.Range(0, candidates.Count)];
-
-        if (!ManaManager.Instance.CanAfford(card.cost, Owner.Enemy)) return;
-
-
-        foreach (Transform slot in enemyFieldZone)
+        var monsterCandidates = enemyhand.FindAll(c => c.type == monsterType);
+        if(monsterCandidates.Count > 0)
         {
-            FieldSlot fieldSlot = slot.GetComponent<FieldSlot>();
-            if (!fieldSlot.isOccupied)
+            var validMonsters = monsterCandidates.FindAll(c => ManaManager.Instance.CanAfford(c.cost, Owner.Enemy));
+            if(validMonsters.Count > 0)
             {
-                ManaManager.Instance.SpendMana(Owner.Enemy, card.cost);
+                var card = validMonsters[Random.Range(0, validMonsters.Count)];
 
-                Debug.Log($"[Enemy] Trying to play: {card.cardName}, hand count before removal: {enemyhand.Count}, handZone child count: {enemyHandZone.childCount}");
-                Transform toRemove = null;
+                foreach (Transform slot in enemyFieldZone)
+                {
+                    FieldSlot fieldSlot = slot.GetComponent<FieldSlot>();
+                    if (!fieldSlot.isOccupied)
+                    {
+                        ManaManager.Instance.SpendMana(Owner.Enemy, card.cost);
+
+                        Debug.Log($"[Enemy] Trying to play: {card.cardName}, hand count before removal: {enemyhand.Count}, handZone child count: {enemyHandZone.childCount}");
+                        Transform toRemove = null;
+                        foreach (Transform t in enemyHandZone)
+                        {
+                            var cd = t.GetComponent<CardDisplay>();
+                            if (cd != null && cd.cardID == card.id)
+                            {
+                                toRemove = t;
+                                break;
+                            }
+                        }
+                        if (toRemove != null)
+                        {
+                            Destroy(toRemove.gameObject);
+                            Debug.Log($"[Enemy] Removed card object from handZone. New child count: {enemyHandZone.childCount}");
+                        }
+                        enemyhand.Remove(card);
+                        Debug.Log($"[Enemy] Removed card from hand list. New hand count: {enemyhand.Count}");
+
+                        GameObject cardObj = Instantiate(cardPrefab, slot);
+                        CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
+                        ModelDatas.CardData data = cardDisplay.GetCardData();
+                        cardDisplay.cardCountText.gameObject.SetActive(false);
+                        cardDisplay.SetCard(card);
+                        cardDisplay.currentZone = CardZone.Field;
+                        cardDisplay.owner = Owner.Enemy;
+                        fieldSlot.isOccupied = true;
+                        cardDisplay.SetupCardUI(card);
+
+                        if (cardDisplay != null && data != null)
+                        {
+                            foreach (var trigger in data.triggers)
+                            {
+                                if (trigger.skillTiming == "OnSummon" || trigger.skillTiming == "OnPlay")
+                                {
+                                    EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), null, 0, "");
+                                    EffectExecutor.TriggerMonsterEffect(cardDisplay, data, summonContext);
+                                    Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
+                                }
+                            }
+                        }
+
+                        EnemyLog($"Enemy played {card.cardName} to the field.");
+                        return;
+                    }
+                }
+            }
+        }
+
+        var spellCandidates = enemyhand.FindAll(c => c.type == spellType);
+        if(spellCandidates.Count > 0)
+        {
+            var validSpells = spellCandidates.FindAll(c => ManaManager.Instance.CanAfford(c.cost, Owner.Enemy));
+            if(validSpells.Count > 0)
+            {
+                var card = validSpells[Random.Range(0, validSpells.Count)];
+
+                bool canPlay = true;
+                CardDisplay tempDisplay = null;
                 foreach (Transform t in enemyHandZone)
                 {
                     var cd = t.GetComponent<CardDisplay>();
                     if (cd != null && cd.cardID == card.id)
                     {
-                        toRemove = t;
+                        tempDisplay = cd;
                         break;
                     }
                 }
-                if (toRemove != null)
-                {
-                    Destroy(toRemove.gameObject);
-                    Debug.Log($"[Enemy] Removed card object from handZone. New child count: {enemyHandZone.childCount}");
-                }
-                enemyhand.Remove(card);
-                Debug.Log($"[Enemy] Removed card from hand list. New hand count: {enemyhand.Count}");
 
-                GameObject cardObj = Instantiate(cardPrefab, slot);
-                CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
-                ModelDatas.CardData data = cardDisplay.GetCardData();
-                cardDisplay.cardCountText.gameObject.SetActive(false);
-                cardDisplay.SetCard(card);
-                cardDisplay.currentZone = CardZone.Field;
-                cardDisplay.owner = Owner.Enemy;
-                fieldSlot.isOccupied = true;
-                cardDisplay.SetupCardUI(card);
-
-                if (cardDisplay != null && data != null)
+                foreach (var trigger in card.triggers)
                 {
-                    foreach(var trigger in data.triggers)
+                    if (NeedsTarget(trigger.skillTarget))
                     {
-                        if(trigger.skillTiming == "OnSummon" || trigger.skillTiming == "OnPlay")
+                        EffectContext tempContext = new EffectContext(Owner.Enemy, null, null, 0, "");
+                        List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, Owner.Enemy, tempContext, null);
+                        if(targets.Count == 0)
                         {
-                            EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), null, 0, "");
-                            EffectExecutor.TriggerMonsterEffect(cardDisplay, data, summonContext);
-                            Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
+                            canPlay = false;
+                            break;
                         }
                     }
                 }
 
-                EnemyLog($"Enemy played {card.cardName} to the field.");
-                break;
+                if (canPlay)
+                {
+                    ManaManager.Instance.SpendMana(Owner.Enemy, card.cost);
+
+                    Transform toRemove = null;
+                    foreach (Transform t in enemyHandZone)
+                    {
+                        var cd = t.GetComponent<CardDisplay>();
+                        if (cd != null && cd.cardID == card.id)
+                        {
+                            toRemove = t;
+                            break;
+                        }
+                    }
+
+                    if (toRemove != null)
+                    {
+                        Destroy(toRemove.gameObject);
+                    }
+                    enemyhand.Remove(card);
+                    EffectExecutor.ExecuteSpell(tempDisplay, card);
+                    EnemyLog($"Enemy played spell {card.cardName}.");
+                }
             }
         }
     }
@@ -531,6 +593,11 @@ public class BattleManager : MonoBehaviour
         {
             enemyCurrentBehaviour.text = currentAction;
         }
+    }
+
+    private bool NeedsTarget(string targetType)
+    {
+        return targetType != "Self" || targetType != "None" || targetType != "";  // 根據你的 targetType 調整
     }
 }
 

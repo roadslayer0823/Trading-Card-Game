@@ -216,8 +216,8 @@ public class BattleManager : MonoBehaviour
 
     public void Attack(CardDisplay attacker, CardDisplay target = null)
     {
-        int attackerDmg = attacker.atkPoint + attacker.tempAtkBuff;
-        int targetDmg = target != null ? target.atkPoint + target.tempAtkBuff: 0;
+        int attackerDmg = attacker.currentAtkPoint + attacker.tempAtkBuff;
+        int targetDmg = target != null ? target.currentAtkPoint + target.tempAtkBuff: 0;
 
         if (attackerDmg <= 0) return;
 
@@ -226,7 +226,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log($"{attacker.cardName} 被眩晕或已攻击过，无法行动！");
             return;
         }
-        if (attacker.isFrozen && attacker.atkPoint <= 0)
+        if (attacker.isFrozen && (attacker.currentAtkPoint + attacker.tempAtkBuff) <= 0)
         {
             Debug.Log($"{attacker.cardName} 被冰冻，攻击力为0，无法造成伤害！");
             attacker.SetIdleAfterAttack(); // 还是要标记已攻击

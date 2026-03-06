@@ -45,6 +45,7 @@ public class CardDisplay : MonoBehaviour
     [HideInInspector] public string cardType;
     [HideInInspector] public string cardID;
     [HideInInspector] public int atkPoint;
+    [HideInInspector] public int currentAtkPoint;
     [HideInInspector] public int hpPoint;
     [HideInInspector] public int currentCount;
     [HideInInspector] public int deckCount;
@@ -54,7 +55,6 @@ public class CardDisplay : MonoBehaviour
     [HideInInspector] public int damageReduction = 0;
     [HideInInspector] public int stunTurnRemaining = 0;
     [HideInInspector] public int untargetableTurnRemaining = 0;
-    [HideInInspector] public int originalAtkPoint;
     [HideInInspector] public bool isAttack = true;
     [HideInInspector] public bool isFrozen = false;
     [HideInInspector] public List<string> elementTags = new();
@@ -98,6 +98,7 @@ public class CardDisplay : MonoBehaviour
         currentZone = zone;
         cardType = data.type;
         atkPoint = data.atk;
+        currentAtkPoint = atkPoint;
         hpPoint = data.hp;
         maxHpPoint = data.hp;
         elementTags.Clear();
@@ -108,7 +109,7 @@ public class CardDisplay : MonoBehaviour
     {
         cardNameText.text = cardName;
         costText.text = data.cost.ToString();
-        atkText.text = atkPoint.ToString();
+        atkText.text = currentAtkPoint.ToString();
         hpText.text = hpPoint.ToString();
         cardCountText.text = "x" + currentCount.ToString();
 
@@ -127,9 +128,9 @@ public class CardDisplay : MonoBehaviour
             if (frozenTurnRemaining <= 0)
             {
                 isFrozen = false;
-                atkPoint = originalAtkPoint;
-                atkText.text = atkPoint.ToString();
-                Debug.Log($"{cardName} 的冰冻状态解除，攻击力恢复为 {atkPoint}。");
+                currentAtkPoint = atkPoint;
+                RefreshAtk();
+                Debug.Log($"{cardName} 的冰冻状态解除，攻击力恢复为 {currentAtkPoint}。");
             }
         }
 
@@ -165,8 +166,7 @@ public class CardDisplay : MonoBehaviour
         Debug.Log($"[ApplyFreeze] 開始凍結 {targetCard.cardName} {duration} 回合");
         if (!isFrozen)
         {
-            originalAtkPoint = atkPoint;  // Save original ATK
-            atkPoint = 0;
+            currentAtkPoint = 0;
             atkText.text = "0";
         }
 
@@ -221,6 +221,12 @@ public class CardDisplay : MonoBehaviour
     {
         currentCount = newCount;
         cardCountText.text = $"x{currentCount}";
+    }
+
+    public void RefreshAtk()
+    {
+        int finalAtk = currentAtkPoint + tempAtkBuff;
+        atkText.text = finalAtk.ToString();
     }
 
     public void AddElementTag(string element)

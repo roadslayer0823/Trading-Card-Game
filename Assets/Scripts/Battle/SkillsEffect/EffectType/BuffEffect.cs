@@ -15,8 +15,8 @@ public class BuffEffect : EffectBase
             int value = int.Parse(atkMatch.Groups[2].Value);
             CardDisplay targetCard = context.target.card;
             targetCard.tempAtkBuff += value;
-            targetCard.atkText.text = $"{targetCard.atkPoint + targetCard.tempAtkBuff}";
-            Debug.Log($"[Buff] {targetCard.cardName} 攻击力 +{value} (当前: {targetCard.atkPoint + targetCard.tempAtkBuff})");
+            targetCard.RefreshAtk();
+            Debug.Log($"[Buff] {targetCard.cardName} 攻击力 +{value} (当前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
             return;
         }
 

@@ -194,7 +194,7 @@ public class CardDisplay : MonoBehaviour
     {
         int newMaxHp = maxHpPoint + tempHpBuff;
         hpPoint = Mathf.Min(hpPoint + amount, newMaxHp);
-        hpText.text = $"{hpPoint} (+{tempHpBuff})";
+        hpText.text = $"{hpPoint})";
         Debug.Log($"{cardName} 恢复 {amount} 点HP，当前HP为 {hpPoint}/{newMaxHp}");
     }
 

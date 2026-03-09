@@ -441,6 +441,7 @@ MonoBehaviour:
   enemyFieldZone: {fileID: 8182210039598413342}
   enemyHealth: {fileID: 1271094781}
   currentTurn: 0
+  canvas: {fileID: 1228832298}
   gameEnded: 0
   gameOverPanel: {fileID: 869004472}
 --- !u!4 &303591803

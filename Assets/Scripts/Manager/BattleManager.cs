@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 
@@ -26,6 +27,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("Setting")]
     public TurnState currentTurn = TurnState.Player;
+    public Canvas canvas;
 
     [Header("Game Over")]
     public bool gameEnded = false;
@@ -55,6 +57,7 @@ public class BattleManager : MonoBehaviour
         StartGame();
     }
 
+    //Battle
     public void StartGame()
     {
         DeckManager.Instance.LoadDeck();
@@ -66,11 +69,6 @@ public class BattleManager : MonoBehaviour
         gameOverPanel.SetActive(false);
 
         StartBattle();
-    }
-
-    public void ReturnToMainMenu()
-    {
-        UIManager.Instance.GotoMainScene();
     }
 
     private void StartBattle()
@@ -155,6 +153,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    //Generic Behaviour
     public void DrawOneCard(bool isPlayer)
     {
         if ((isPlayer ? DeckManager.Instance.playerHand.Count : DeckManager.Instance.enemyHand.Count) >= 10)
@@ -164,6 +163,94 @@ public class BattleManager : MonoBehaviour
         HandManager.Instance.DrawCard(card, isPlayer);
     }
 
+    private int CalculateElementReaction(CardDisplay attacker, CardDisplay defender, int baseDamage)
+    {
+        HashSet<string> attTags = new HashSet<string>(attacker.elementTags.ConvertAll(t => t.ToLower()));
+        HashSet<string> defTags = new HashSet<string>(defender.elementTags.ConvertAll(t => t.ToLower()));
+
+        Debug.Log($"[元素反应检查] {attacker.cardName} tags: [{string.Join(", ", attTags)}] → {defender.cardName} tags: [{string.Join(", ", defTags)}] 基础伤害 {baseDamage}");
+
+        // 蒸发
+        if (attTags.Contains("fire") && defTags.Contains("water"))
+        {
+            Debug.Log("⚡ 蒸发反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+        if (attTags.Contains("water") && defTags.Contains("fire"))
+        {
+            Debug.Log("💨 蒸发反应！伤害 ×2");
+            return baseDamage * 2;
+        }
+
+        // 融化
+        if (attTags.Contains("fire") && defTags.Contains("ice"))
+        {
+            Debug.Log("🔥 融化反应！伤害 ×2");
+            return baseDamage * 2;
+        }
+        if (attTags.Contains("ice") && defTags.Contains("fire"))
+        {
+            Debug.Log("❄️ 融化反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+
+        // 雷 + 水 = 感电
+        if (attTags.Contains("lightning") && defTags.Contains("water"))
+        {
+            Debug.Log("⚡ 感电反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+        if (attTags.Contains("water") && defTags.Contains("lightning"))
+        {
+            Debug.Log("💧 感电反应！伤害 ×1.5");
+            return Mathf.CeilToInt(baseDamage * 1.5f);
+        }
+
+        // 可以继续加：风 + 任意 = 扩散、超载 等
+
+        return baseDamage;
+    }
+
+    private void UpdateFieldStatus(Owner owner)
+    {
+        Transform fieldZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
+        foreach (Transform slot in fieldZone)
+        {
+            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
+            if (card != null && card.cardType == monsterType)
+            {
+                card.UpdateStatusAtTurnEnd();
+            }
+        }
+    }
+
+    private void ResetFieldCards(Owner owner)
+    {
+        Transform fieldZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
+        foreach (Transform slot in fieldZone)
+        {
+            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
+            if (card != null && card.cardType == monsterType)
+            {
+                if (card.stunTurnRemaining <= 0)
+                {
+                    card.ResetAttackState();
+                }
+
+                var data = card.GetCardData();
+                foreach (var trigger in data.triggers)
+                {
+                    if (trigger.skillTiming == "PerTurn" || trigger.skillTiming == "OnTurnEnd")
+                    {
+                        EffectContext turnContext = new EffectContext(card.owner, null, null, 0, "");
+                        EffectExecutor.TriggerMonsterEffect(card, data, turnContext);
+                    }
+                }
+            }
+        }
+    }
+
+    //Player Behaviour
     public void PlayCard(BattleCardDragHandler card)
     {
         CardDisplay cardDisplay = card.GetComponent<CardDisplay>();
@@ -285,129 +372,6 @@ public class BattleManager : MonoBehaviour
         }
         attacker.SetIdleAfterAttack();
         CheckGameOver();
-    }
-
-    private int CalculateElementReaction(CardDisplay attacker, CardDisplay defender, int baseDamage)
-    {
-        HashSet<string> attTags = new HashSet<string>(attacker.elementTags.ConvertAll(t => t.ToLower()));
-        HashSet<string> defTags = new HashSet<string>(defender.elementTags.ConvertAll(t => t.ToLower()));
-
-        Debug.Log($"[元素反应检查] {attacker.cardName} tags: [{string.Join(", ", attTags)}] → {defender.cardName} tags: [{string.Join(", ", defTags)}] 基础伤害 {baseDamage}");
-
-        // 蒸发
-        if (attTags.Contains("fire") && defTags.Contains("water"))
-        {
-            Debug.Log("⚡ 蒸发反应！伤害 ×1.5");
-            return Mathf.CeilToInt(baseDamage * 1.5f);
-        }
-        if (attTags.Contains("water") && defTags.Contains("fire"))
-        {
-            Debug.Log("💨 蒸发反应！伤害 ×2");
-            return baseDamage * 2;
-        }
-
-        // 融化
-        if (attTags.Contains("fire") && defTags.Contains("ice"))
-        {
-            Debug.Log("🔥 融化反应！伤害 ×2");
-            return baseDamage * 2;
-        }
-        if (attTags.Contains("ice") && defTags.Contains("fire"))
-        {
-            Debug.Log("❄️ 融化反应！伤害 ×1.5");
-            return Mathf.CeilToInt(baseDamage * 1.5f);
-        }
-
-        // 雷 + 水 = 感电
-        if (attTags.Contains("lightning") && defTags.Contains("water"))
-        {
-            Debug.Log("⚡ 感电反应！伤害 ×1.5");
-            return Mathf.CeilToInt(baseDamage * 1.5f);
-        }
-        if (attTags.Contains("water") && defTags.Contains("lightning"))
-        {
-            Debug.Log("💧 感电反应！伤害 ×1.5");
-            return Mathf.CeilToInt(baseDamage * 1.5f);
-        }
-
-        // 可以继续加：风 + 任意 = 扩散、超载 等
-
-        return baseDamage;
-    }
-
-    private void UpdateFieldStatus(Owner owner)
-    {
-        Transform fieldZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
-        foreach (Transform slot in fieldZone)
-        {
-            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
-            if (card != null && card.cardType == monsterType)
-            {
-                card.UpdateStatusAtTurnEnd();
-            }
-        }
-    }
-
-    private void ResetFieldCards(Owner owner)
-    {
-        Transform fieldZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
-        foreach (Transform slot in fieldZone)
-        {
-            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
-            if (card != null && card.cardType == monsterType)
-            {
-                if(card.stunTurnRemaining <= 0)
-                {
-                     card.ResetAttackState();
-                }
-
-                var data = card.GetCardData();
-                foreach(var trigger in data.triggers)
-                {
-                    if (trigger.skillTiming == "PerTurn" || trigger.skillTiming == "OnTurnEnd")
-                    {
-                        EffectContext turnContext = new EffectContext(card.owner, null, null, 0, "");
-                        EffectExecutor.TriggerMonsterEffect(card, data, turnContext);
-                    }
-                }
-            }
-        }
-    }
-
-    public List<CardDisplay> GetEnemyUnits(Owner owner)
-    {
-        Transform enemyZone = owner == Owner.Player ? enemyFieldZone : playerFieldZone;
-        List<CardDisplay> enemies = new();
-
-        foreach (Transform slot in enemyZone)
-        {
-            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
-            if (card != null && card.cardType == monsterType)
-            {
-                enemies.Add(card);
-            }
-        }
-        return enemies;
-    }
-
-    public List<CardDisplay> GetAllyUnits(Owner owner)
-    {
-        Transform allyZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
-        List<CardDisplay> allies = new();
-
-        foreach (Transform slot in allyZone)
-        {
-            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
-            if (card != null && card.cardType == "Monster")
-            {
-                allies.Add(card);
-            }
-        }
-        return allies;
-    }
-    public HealthPointHandler GetCardByOwner(Owner owner)
-    {
-        return owner == Owner.Player ? playerHealth : enemyHealth;
     }
 
     //Enemy AI Behavior
@@ -556,6 +520,8 @@ public class BattleManager : MonoBehaviour
                         Destroy(toRemove.gameObject);
                     }
                     enemyhand.Remove(card);
+
+                    ShowSpellPopup(card.cardName, card.skillText, card.cost.ToString(), card.cardSprite);
                     EffectExecutor.ExecuteSpell(tempDisplay, card);
                     EnemyLog($"Enemy played spell {card.cardName}.");
                 }
@@ -598,6 +564,80 @@ public class BattleManager : MonoBehaviour
     private bool NeedsTarget(string targetType)
     {
         return targetType != "Self" || targetType != "None" || targetType != "";  // 根據你的 targetType 調整
+    }
+
+    //Verification
+    public List<CardDisplay> GetEnemyUnits(Owner owner)
+    {
+        Transform enemyZone = owner == Owner.Player ? enemyFieldZone : playerFieldZone;
+        List<CardDisplay> enemies = new();
+
+        foreach (Transform slot in enemyZone)
+        {
+            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
+            if (card != null && card.cardType == monsterType)
+            {
+                enemies.Add(card);
+            }
+        }
+        return enemies;
+    }
+
+    public List<CardDisplay> GetAllyUnits(Owner owner)
+    {
+        Transform allyZone = owner == Owner.Player ? playerFieldZone : enemyFieldZone;
+        List<CardDisplay> allies = new();
+
+        foreach (Transform slot in allyZone)
+        {
+            CardDisplay card = slot.GetComponentInChildren<CardDisplay>();
+            if (card != null && card.cardType == "Monster")
+            {
+                allies.Add(card);
+            }
+        }
+        return allies;
+    }
+    public HealthPointHandler GetCardByOwner(Owner owner)
+    {
+        return owner == Owner.Player ? playerHealth : enemyHealth;
+    }
+
+    //UI
+    private void ShowSpellPopup(string spellName, string skillText, string cost, Sprite artSprite = null)
+    {
+        if (cardPrefab == null) return;
+
+        GameObject popup = Instantiate(cardPrefab, Vector3.zero, Quaternion.identity);
+        popup.transform.SetParent(canvas.transform, false);
+        Transform container = popup.transform.Find("Container");
+
+        if(container != null)
+        {
+            TMP_Text nameText = container.Find("NameText")?.GetComponent<TMP_Text>();
+            TMP_Text costText = container.Find("Cost")?.GetComponent<TMP_Text>();
+            TMP_Text descriptionText = container.Find("SkillText")?.GetComponent<TMP_Text>();
+            if (nameText != null) nameText.text = spellName;
+            if (costText != null) costText.text = cost;
+            if (descriptionText != null) descriptionText.text = skillText;
+
+            Image bgImage = container.Find("CardImage")?.GetComponent<Image>();
+            if (bgImage != null && artSprite != null) bgImage.sprite = artSprite;
+
+            Transform stateArea = container.Find("StateArea");
+            if (stateArea != null) stateArea.gameObject.SetActive(false);
+        }
+
+        CanvasGroup cg = popup.GetComponent<CanvasGroup>();
+        if (cg == null) cg = popup.AddComponent<CanvasGroup>();
+
+        cg.alpha = 1f;
+        LeanTween.alphaCanvas(cg, 0f, 2f).setEase(LeanTweenType.easeInOutQuad).setOnComplete(() => Destroy(popup));
+    }
+
+    public void ReturnToMainMenu()
+    {
+        UIManager.Instance.GotoMainScene();
     }
 }
 

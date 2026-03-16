@@ -10,12 +10,13 @@ public class CardManager : MonoBehaviour
 {
     public static CardManager Instance;
     
-    [Header("References")]
+    [Header("UI References")]
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private Transform libraryGridParent;
     [SerializeField] private Transform deckGridParent;
     [SerializeField] private TMP_Text deckCountText;
     [SerializeField] private Button saveDeckButton;
+    [SerializeField] private TMP_InputField deckNameInput;
 
     [HideInInspector] public int currentDeckCount = 0;
     [HideInInspector] public int maxDeckCount = 30;
@@ -35,8 +36,20 @@ public class CardManager : MonoBehaviour
 
         saveDeckButton.onClick.AddListener(() =>
         {
-            DeckManager.Instance.SaveDeck();
+            OnSaveClicked();
         }); 
+    }
+
+    private void OnSaveClicked()
+    {
+        string deckName = deckNameInput.text.Trim();
+
+        if (string.IsNullOrEmpty(deckName))
+        {
+            return;
+        }
+        DeckManager.Instance.SaveCurrentDeckAs(deckName);
+        Debug.Log($"卡組已儲存：{deckName}");
     }
 
     private void LoadCardDataFromJson()

@@ -60,7 +60,6 @@ public class BattleManager : MonoBehaviour
     //Battle
     public void StartGame()
     {
-        DeckManager.Instance.LoadDeck();
         DeckManager.Instance.GeneratePlayerDeck();
         DeckManager.Instance.GenerateEnemyDeck();
         ManaManager.Instance.ResetMana();

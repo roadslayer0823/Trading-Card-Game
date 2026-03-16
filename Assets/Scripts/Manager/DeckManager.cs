@@ -13,9 +13,10 @@ public class DeckManager : MonoBehaviour
     private int maxDeckSize = 30;
     private int maxCopiesPerCard = 3;
     private int maxHandSize = 10;
-    private string deckSavePath => Path.Combine(Application.persistentDataPath, "saved_deck.json");
+    private string decksSavePath => Path.Combine(Application.persistentDataPath, "saved_decks.json");
 
     private Dictionary<string, int> currentDeck = new();
+    private List<ModelDatas.SavedDeck> savedDecks = new List<ModelDatas.SavedDeck>();
     private List<ModelDatas.CardData> playerDeckList = new();
     private List<ModelDatas.CardData> enemyDeckList = new();
     private Dictionary<string, ModelDatas.CardData> cardLookup = new();
@@ -28,6 +29,7 @@ public class DeckManager : MonoBehaviour
             return;
         }
         Instance = this;
+        LoadAllDecks();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -55,7 +57,9 @@ public class DeckManager : MonoBehaviour
         }
 
         Debug.Log($"Loaded {cardPool.Count} cards into pool.");
+        Debug.Log(Application.persistentDataPath + Terminology.CARDS_JSON_NAME);
     }
+
     public void GeneratePlayerDeck()
     {
         playerDeckList.Clear();
@@ -189,27 +193,69 @@ public class DeckManager : MonoBehaviour
     }
 
     //save and load deck
-    public void SaveDeck()
+    public void SaveAllDecks()
     {
-        string json = JsonConvert.SerializeObject(currentDeck, Formatting.Indented);
-        File.WriteAllText(deckSavePath, json);
-        Debug.Log($"Deck saved to: {deckSavePath}");
+        string json = JsonConvert.SerializeObject(savedDecks, Formatting.Indented);
+        File.WriteAllText(decksSavePath, json);
+        Debug.Log($"Saved {savedDecks.Count} decks to {decksSavePath}");
     }
 
-    public void LoadDeck()
+    public void SaveCurrentDeckAs(string deckName, string description = "", string coverCardID = "")
     {
-        if (!File.Exists(deckSavePath)) 
+        ModelDatas.SavedDeck existDeck = savedDecks.Find(d => d.deckName == deckName);
+        if(existDeck != null)
         {
-            Debug.LogWarning("No saved deck found.");
+            existDeck.cards = new Dictionary<string, int>(currentDeck);
+            existDeck.description = description;
+            existDeck.coverCardID = coverCardID;
+            Debug.Log($"Overwrote existing deck: {deckName}");
+        }
+        else
+        {
+            ModelDatas.SavedDeck newDeck = new ModelDatas.SavedDeck
+            {
+                deckName = deckName,
+                cards = new Dictionary<string, int>(currentDeck),
+                description = description,
+                coverCardID = coverCardID
+            };
+            savedDecks.Add(newDeck);
+            Debug.Log($"Created new deck: {deckName}");
+        }
+        SaveAllDecks();
+    }
+
+    public void LoadAllDecks()
+    {
+        if (!File.Exists(decksSavePath))
+        {
+            Debug.Log("No saved decks found, starting with empty list.");
+            savedDecks = new List<ModelDatas.SavedDeck>();
             return;
         }
 
-        string json = File.ReadAllText(deckSavePath);
-        currentDeck = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
+        string json = File.ReadAllText(decksSavePath);
+        savedDecks = JsonConvert.DeserializeObject<List<ModelDatas.SavedDeck>>(json) ?? new List<ModelDatas.SavedDeck>();
+        Debug.Log($"Loaded {savedDecks.Count} decks from {decksSavePath}");
+    }
 
+    public bool LoadDeckByName(string deckName)
+    {
+        ModelDatas.SavedDeck selected = savedDecks.Find(d => d.deckName == deckName);
+        if(selected == null)
+        {
+            Debug.LogWarning($"Deck not found: {deckName}");
+            return false;
+        }
+
+        currentDeck = new Dictionary<string, int>(selected.cards);
         GeneratePlayerDeck();
-        Debug.Log($"Deck saved to: {deckSavePath}");
+        return true;
     }
 
     public Dictionary<string, int> GetCurrentDeck() => currentDeck;
+    public List<ModelDatas.SavedDeck> GetAllSavedDecks()
+    {
+        return savedDecks;
+    }
 }

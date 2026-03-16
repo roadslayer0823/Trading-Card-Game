@@ -30,4 +30,13 @@ public class ModelDatas
         public string skillTarget;
         public string description;
     }
+
+    [Serializable]
+    public class SavedDeck
+    {
+        public string deckName;
+        public Dictionary<string, int> cards;
+        public string description;
+        public string coverCardID;
+    }
 }

@@ -10,9 +10,9 @@ public class UIManager : MonoBehaviour
     [Header("Manager")]
     public GameManager GameManager = null;
 
-    [Header("Button")]
-    public Button StartButton = null;
-    public Button SaveDeckButton = null;
+    [Header("UI Reference")]
+    public GameObject deckSelectionUI = null;
+    public Button startGameButton = null;
 
     public void Awake()
     {
@@ -26,16 +26,12 @@ public class UIManager : MonoBehaviour
     }
     public void Initialize()
     {
-        SaveDeckButton.onClick.AddListener(() => GameManager.DeckManager.SaveDeck());
-        StartButton.onClick.AddListener(() =>
-        {
-            GotoBattleScene();
-        });
+        startGameButton.onClick.AddListener(() => OpenDeckSelectionPanel());
     }
 
-    public void GotoBattleScene()
+    public void OpenDeckSelectionPanel()
     {
-        SceneManager.LoadScene("BattleScene");
+        deckSelectionUI.gameObject.SetActive(true);
     }
 
     public void GotoMainScene()

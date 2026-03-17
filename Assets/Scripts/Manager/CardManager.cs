@@ -103,7 +103,6 @@ public class CardManager : MonoBehaviour
             prefab.transform.Find("Container").gameObject.transform.Find("StateArea").gameObject.SetActive(false);
         }
     }
-    //TODO: fixed the issue of unable to extending the container size cause text overlapping
     private void UpdateDeckCountUI()
     {
         if (deckCountText != null) 

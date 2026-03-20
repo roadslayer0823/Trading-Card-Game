@@ -48,7 +48,7 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
             if(targetPanel != cardDisplay.currentPanel)
             {
-                CardManager.Instance.TransferCard(cardDisplay.cardID, cardDisplay.currentPanel, targetPanel);
+                DeckBuilderManager.Instance.TransferCard(cardDisplay.cardID, cardDisplay.currentPanel, targetPanel);
             }
         }
 

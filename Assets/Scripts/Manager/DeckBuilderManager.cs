@@ -6,9 +6,9 @@ using static ModelDatas;
 using TMPro;
 
 public enum PanelType {None, Library, Deck}
-public class CardManager : MonoBehaviour
+public class DeckBuilderManager : MonoBehaviour
 {
-    public static CardManager Instance;
+    public static DeckBuilderManager Instance;
     
     [Header("UI References")]
     [SerializeField] private GameObject cardPrefab;
@@ -16,6 +16,7 @@ public class CardManager : MonoBehaviour
     [SerializeField] private Transform deckGridParent;
     [SerializeField] private TMP_Text deckCountText;
     [SerializeField] private Button saveDeckButton;
+    [SerializeField] private Button quitButton;
     [SerializeField] private TMP_InputField deckNameInput;
 
     [HideInInspector] public int currentDeckCount = 0;
@@ -37,7 +38,9 @@ public class CardManager : MonoBehaviour
         saveDeckButton.onClick.AddListener(() =>
         {
             OnSaveClicked();
-        }); 
+        });
+
+        quitButton.onClick.AddListener(() => OnQuitClicked());
     }
 
     private void OnSaveClicked()
@@ -47,6 +50,19 @@ public class CardManager : MonoBehaviour
         if (string.IsNullOrEmpty(deckName))
         {
             return;
+        }
+
+        int count = currentDeckCount;
+        if (count == 0)
+        {
+            Debug.LogWarning("卡組為空，無法儲存");
+            return;
+        }
+
+        if (count < maxDeckCount)
+        {
+            Debug.LogWarning($"卡組只有 {count}/{maxDeckCount} 張，是否仍要儲存？");
+            // 可以加 UI 確認彈窗，暫時直接存
         }
         DeckManager.Instance.SaveCurrentDeckAs(deckName);
         Debug.Log($"卡組已儲存：{deckName}");
@@ -103,6 +119,7 @@ public class CardManager : MonoBehaviour
             prefab.transform.Find("Container").gameObject.transform.Find("StateArea").gameObject.SetActive(false);
         }
     }
+
     private void UpdateDeckCountUI()
     {
         if (deckCountText != null) 
@@ -125,9 +142,26 @@ public class CardManager : MonoBehaviour
 
         CardDisplay fromCard = fromDict[cardID];
 
-        if (from == PanelType.Deck) currentDeckCount--;
-        fromCard.UpdateCount(fromCard.currentCount - 1);
+        bool success = false;
 
+        if(to == PanelType.Deck)
+        {
+            success = DeckManager.Instance.IsAddCardToDeck(cardID);
+            if (success) currentDeckCount++;
+            else
+            {
+                Debug.LogWarning($"無法加入卡片 {cardID}：已達上限或牌庫滿");
+                return;
+            }
+        }
+        else if(from == PanelType.Deck)
+        {
+            success = DeckManager.Instance.RemoveCardFromDeck(cardID);
+            if (success) currentDeckCount--;
+        }
+
+
+        fromCard.UpdateCount(fromCard.currentCount - 1);
         if(fromCard.currentCount <= 0)
         {
             Destroy(fromCard.gameObject);
@@ -141,24 +175,53 @@ public class CardManager : MonoBehaviour
         else
         {
             CardData data = cardDataList.Find(c => c.id == cardID);
-            GameObject newCard = Instantiate(cardPrefab, toParent);
-            CardDisplay display = newCard.GetComponent<CardDisplay>();
-            display.SetCard(data, 1, to);
-            display.SetupCardUI(data);
-            toDict.Add(cardID, display);
-        }
-
-        if (to == PanelType.Deck) 
-        {
-            currentDeckCount++;
-            DeckManager.Instance.IsAddCardToDeck(cardID);
-        }
-        else if(from == PanelType.Deck)
-        {
-            DeckManager.Instance.RemoveCardFromDeck(cardID);
+            if(data != null)
+            {
+                GameObject newCard = Instantiate(cardPrefab, toParent);
+                CardDisplay display = newCard.GetComponent<CardDisplay>();
+                display.SetCard(data, 1, to);
+                display.SetupCardUI(data);
+                toDict.Add(cardID, display);
+            }
         }
 
         UpdateDeckCountUI();
         LayoutRebuilder.ForceRebuildLayoutImmediate(toParent.GetComponent<RectTransform>());
+    }
+
+    public void LoadDeckForEdit(string deckName)
+    {
+        if (DeckManager.Instance.LoadDeckByName(deckName))
+        {
+            deckNameInput.text = deckName;
+
+            foreach (Transform child in deckGridParent) Destroy(child.gameObject);
+            deckCards.Clear();
+            currentDeckCount = 0;
+
+            foreach(var kvp in DeckManager.Instance.GetCurrentDeck())
+            {
+                string id = kvp.Key;
+                int count = kvp.Value;
+
+                CardData data = cardDataList.Find(c => c.id == id);
+                if (data == null) continue;
+
+                GameObject cardObj = Instantiate(cardPrefab, deckGridParent);
+                CardDisplay display = cardObj.GetComponent<CardDisplay>();
+                display.SetCard(data, count, PanelType.Deck);
+                display.SetupCardUI(data);
+                deckCards.Add(id, display);
+
+                currentDeckCount += count;
+            }
+            UpdateDeckCountUI();
+        }
+    }
+
+    private void OnQuitClicked()
+    {
+        DeckSelectionManager.Instance.RefreshDeckList();
+        this.gameObject.SetActive(false);
     }
 }

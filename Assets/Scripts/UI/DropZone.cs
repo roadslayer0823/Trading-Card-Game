@@ -16,7 +16,7 @@ public class DropZone : MonoBehaviour, IDropHandler
         PanelType fromPanel = droppedCard.currentPanel;
         string cardID = droppedCard.cardID;
 
-        if (fromPanel == PanelType.Library && panelType == PanelType.Deck && CardManager.Instance.currentDeckCount >= CardManager.Instance.maxDeckCount)
+        if (fromPanel == PanelType.Library && panelType == PanelType.Deck && DeckBuilderManager.Instance.currentDeckCount >= DeckBuilderManager.Instance.maxDeckCount)
         {
             Debug.Log("Deck is full!");
             return;
@@ -24,7 +24,7 @@ public class DropZone : MonoBehaviour, IDropHandler
 
         Debug.Log($"Dropped card ID: {cardID} from {fromPanel} to {panelType}");
 
-        CardManager.Instance.TransferCard(cardID, fromPanel, panelType);
+        DeckBuilderManager.Instance.TransferCard(cardID, fromPanel, panelType);
         Destroy(dropped);
     }
 }

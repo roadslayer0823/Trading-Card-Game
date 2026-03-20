@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public DeckManager DeckManager;
-    public CardManager CardManager;
+    public DeckBuilderManager DeckBuilderManager;
     public UIManager UIManager;
  
     private void Awake()
@@ -25,6 +25,6 @@ public class GameManager : MonoBehaviour
     {
         if (DeckManager != null) DeckManager.Initialize();
         if (UIManager != null) UIManager.Initialize();
-        if (CardManager != null) CardManager.Initialize();
+        if (DeckBuilderManager != null) DeckBuilderManager.Initialize();
     }
 }

@@ -6,15 +6,22 @@ using TMPro;
 
 public class DeckSelectionManager : MonoBehaviour
 {
+    public static DeckSelectionManager Instance;
+
     [Header("UI Reference")]
     public GameObject deckItemPrefab;
     public TMP_Text selectedDeckText;
     public Button startButton;
     public Button backButton;
+    public Button createButton;
     public Transform deckContent;
 
+    private string selectedDeckName;
 
-    private string selectedDeckName = null;
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -26,6 +33,7 @@ public class DeckSelectionManager : MonoBehaviour
         startButton.interactable = false;
         selectedDeckText.text = "Select a Deck";
         backButton.onClick.AddListener(OnBackClicked);
+        createButton.onClick.AddListener(OnCreateClicked);
     }
 
     public void RefreshDeckList()
@@ -72,6 +80,11 @@ public class DeckSelectionManager : MonoBehaviour
     private void OnBackClicked()
     {
         gameObject.SetActive(false);
+    }
+
+    private void OnCreateClicked()
+    {
+        UIManager.Instance.OpenDeckBuilderPanel();
     }
 
 }

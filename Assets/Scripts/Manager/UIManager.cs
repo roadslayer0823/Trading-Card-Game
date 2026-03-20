@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
 
     [Header("UI Reference")]
     public GameObject deckSelectionUI = null;
+    public GameObject deckBuilderUI = null;
     public Button startGameButton = null;
 
     public void Awake()
@@ -32,6 +33,11 @@ public class UIManager : MonoBehaviour
     public void OpenDeckSelectionPanel()
     {
         deckSelectionUI.gameObject.SetActive(true);
+    }
+
+    public void OpenDeckBuilderPanel()
+    {
+        deckBuilderUI.gameObject.SetActive(true);
     }
 
     public void GotoMainScene()

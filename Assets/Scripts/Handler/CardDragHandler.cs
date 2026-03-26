@@ -37,21 +37,11 @@ public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnEndDrag(PointerEventData eventData)
     {
-
-        canvasGroup.blocksRaycasts = true;
-
         GameObject targetObj = eventData.pointerEnter;
-        
-        if(targetObj != null && targetObj.TryGetComponent(out DropZone dropZone))
+
+        if (targetObj == null || !targetObj.TryGetComponent<DropZone>(out _))
         {
-            PanelType targetPanel = dropZone.panelType;
-
-            if(targetPanel != cardDisplay.currentPanel)
-            {
-                DeckBuilderManager.Instance.TransferCard(cardDisplay.cardID, cardDisplay.currentPanel, targetPanel);
-            }
+            Destroy(gameObject);
         }
-
-        Destroy(gameObject);
     }
 }

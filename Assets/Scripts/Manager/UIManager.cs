@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,8 @@ public class UIManager : MonoBehaviour
     public GameObject deckSelectionUI = null;
     public GameObject deckBuilderUI = null;
     public Button startGameButton = null;
+    public ConfirmationDialog confirmationPanel = null;
+    public DeckOptionsPopup deckOptionPanel = null;
 
     public void Awake()
     {
@@ -25,9 +28,17 @@ public class UIManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+
     public void Initialize()
     {
         startGameButton.onClick.AddListener(() => OpenDeckSelectionPanel());
+        confirmationPanel.Initialize();
+        deckOptionPanel.Initialize();
+    }
+
+    public void ShowConfirmationDialog(string message, Action action)
+    {
+        confirmationPanel.Show(message, action);
     }
 
     public void OpenDeckSelectionPanel()

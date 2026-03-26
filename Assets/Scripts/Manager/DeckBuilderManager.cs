@@ -25,10 +25,7 @@ public class DeckBuilderManager : MonoBehaviour
     private Dictionary<string, CardDisplay> libraryCards = new();
     private Dictionary<string, CardDisplay> deckCards = new();
     private List<CardData> cardDataList;
-    private void Awake()
-    {
-        Instance = this;
-    }
+    
     public void Initialize() 
     {
         LoadCardDataFromJson();
@@ -40,6 +37,7 @@ public class DeckBuilderManager : MonoBehaviour
             OnSaveClicked();
         });
 
+        Instance = this;
         quitButton.onClick.AddListener(() => OnQuitClicked());
     }
 
@@ -178,6 +176,7 @@ public class DeckBuilderManager : MonoBehaviour
             if(data != null)
             {
                 GameObject newCard = Instantiate(cardPrefab, toParent);
+                newCard.AddComponent<CardDragHandler>();
                 CardDisplay display = newCard.GetComponent<CardDisplay>();
                 display.SetCard(data, 1, to);
                 display.SetupCardUI(data);
@@ -199,7 +198,9 @@ public class DeckBuilderManager : MonoBehaviour
             deckCards.Clear();
             currentDeckCount = 0;
 
-            foreach(var kvp in DeckManager.Instance.GetCurrentDeck())
+            var currentDeckDict = DeckManager.Instance.GetCurrentDeck();
+
+            foreach(var kvp in currentDeckDict)
             {
                 string id = kvp.Key;
                 int count = kvp.Value;
@@ -208,6 +209,7 @@ public class DeckBuilderManager : MonoBehaviour
                 if (data == null) continue;
 
                 GameObject cardObj = Instantiate(cardPrefab, deckGridParent);
+                cardObj.AddComponent<CardDragHandler>();
                 CardDisplay display = cardObj.GetComponent<CardDisplay>();
                 display.SetCard(data, count, PanelType.Deck);
                 display.SetupCardUI(data);
@@ -215,8 +217,31 @@ public class DeckBuilderManager : MonoBehaviour
 
                 currentDeckCount += count;
             }
+            RefreshLibraryForEdit();
             UpdateDeckCountUI();
         }
+    }
+
+    private void RefreshLibraryForEdit()
+    {
+        foreach(Transform child in libraryGridParent)
+        {
+            Destroy(child.gameObject);
+        }
+        libraryCards.Clear();
+
+        var currentDeckDict = DeckManager.Instance.GetCurrentDeck();
+
+        foreach (CardData data in cardDataList)
+        {
+            // Only spawn cards that have NOT been added to the current deck
+            if (!currentDeckDict.ContainsKey(data.id))
+            {
+                SpawnCard(data);   // uses full data.cardCount as before
+            }
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(libraryGridParent.GetComponent<RectTransform>());
     }
 
     private void OnQuitClicked()

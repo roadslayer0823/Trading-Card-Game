@@ -9,6 +9,7 @@ public class DeckSelectionManager : MonoBehaviour
     public static DeckSelectionManager Instance;
 
     [Header("UI Reference")]
+    public GameObject deckOptionPopup;
     public GameObject deckItemPrefab;
     public TMP_Text selectedDeckText;
     public Button startButton;
@@ -67,6 +68,9 @@ public class DeckSelectionManager : MonoBehaviour
         selectedDeckName = deckName;
         selectedDeckText.text = $"selected deck: {deckName}";
         startButton.interactable = true;
+
+        deckOptionPopup.GetComponent<DeckOptionsPopup>().Show(deckName);
+
         startButton.onClick.RemoveAllListeners();
         startButton.onClick.AddListener(() => StartGameWithDeck(deckName));
     }

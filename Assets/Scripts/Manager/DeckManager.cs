@@ -253,6 +253,16 @@ public class DeckManager : MonoBehaviour
         return true;
     }
 
+    public bool DeleteDeckByName(string deckName)
+    {
+        ModelDatas.SavedDeck deckToDelete = savedDecks.Find(d => d.deckName == deckName);
+        if (deckToDelete == null) return false;
+
+        savedDecks.Remove(deckToDelete);
+        SaveAllDecks();
+        return true;
+    }
+
     public Dictionary<string, int> GetCurrentDeck() => currentDeck;
     public List<ModelDatas.SavedDeck> GetAllSavedDecks()
     {

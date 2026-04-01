@@ -16,7 +16,6 @@ public class DeckBuilderManager : MonoBehaviour
     [SerializeField] private Transform deckGridParent;
     [SerializeField] private TMP_Text deckCountText;
     [SerializeField] private Button saveDeckButton;
-    [SerializeField] private Button quitButton;
     [SerializeField] private TMP_InputField deckNameInput;
 
     [HideInInspector] public int currentDeckCount = 0;
@@ -38,7 +37,6 @@ public class DeckBuilderManager : MonoBehaviour
         });
 
         Instance = this;
-        quitButton.onClick.AddListener(() => OnQuitClicked());
     }
 
     private void OnSaveClicked()
@@ -63,6 +61,8 @@ public class DeckBuilderManager : MonoBehaviour
             // 可以加 UI 確認彈窗，暫時直接存
         }
         DeckManager.Instance.SaveCurrentDeckAs(deckName);
+        DeckSelectionManager.Instance.RefreshDeckList();
+        this.gameObject.SetActive(false);
         Debug.Log($"卡組已儲存：{deckName}");
     }
 
@@ -242,11 +242,5 @@ public class DeckBuilderManager : MonoBehaviour
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(libraryGridParent.GetComponent<RectTransform>());
-    }
-
-    private void OnQuitClicked()
-    {
-        DeckSelectionManager.Instance.RefreshDeckList();
-        this.gameObject.SetActive(false);
     }
 }

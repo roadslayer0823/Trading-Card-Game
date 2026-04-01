@@ -1,22 +1,28 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using TMPro;
 using UnityEngine.EventSystems;
 
 public class DeckOptionsPopup : MonoBehaviour
 {
     [Header("UI Reference")]
-    [SerializeField] private GameObject popupRoot;
+    [SerializeField] private RectTransform popupRoot;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TMP_Text deckNameText;
     [SerializeField] private Button editButton;
     [SerializeField] private Button deleteButton;
 
+    [Header("Animation Settings")]
+    [SerializeField] private float slideDuration = 0.35f;
+    [SerializeField] private float fadeDuration = 0.25f;
+    [SerializeField] private Vector2 slideOffset = new Vector2(400f, 0f);
+
     private string currentDeckName;
+    private Vector2 originalAnchoredPostion;
 
     public void Initialize()
     {
+        originalAnchoredPostion = popupRoot.anchoredPosition;
         if(backgroundImage != null)
         {
             EventTrigger trigger = backgroundImage.gameObject.GetComponent<EventTrigger>();
@@ -39,7 +45,21 @@ public class DeckOptionsPopup : MonoBehaviour
         editButton.onClick.AddListener(OnEditClicked);
         deleteButton.onClick.AddListener(OnDeleteClicked);
 
-        popupRoot.SetActive(true);
+        popupRoot.gameObject.SetActive(true);
+        backgroundImage.gameObject.SetActive(true);
+        PlayShowAnimation();
+    }
+
+    private void PlayShowAnimation()
+    {
+        popupRoot.anchoredPosition = originalAnchoredPostion + slideOffset;
+        popupRoot.localScale = Vector3.one;
+        CanvasGroup cg = popupRoot.GetComponent<CanvasGroup>();
+        if (cg == null) cg = popupRoot.gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
+
+        LeanTween.move(popupRoot, originalAnchoredPostion, slideDuration).setEase(LeanTweenType.easeOutQuad);
+        LeanTween.alphaCanvas(cg, 1f, fadeDuration).setEase(LeanTweenType.easeOutQuad);
     }
 
     private void OnEditClicked()
@@ -56,7 +76,8 @@ public class DeckOptionsPopup : MonoBehaviour
 
     private void ClosePopup()
     {
-        popupRoot.SetActive(false);
+        popupRoot.gameObject.SetActive(false);
+        backgroundImage.gameObject.SetActive(false);
     }
 
     private void ShowDeleteConfirmation()

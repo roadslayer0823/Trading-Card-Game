@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour
     public Button startGameButton = null;
     public ConfirmationDialog confirmationPanel = null;
     public DeckOptionsPopup deckOptionPanel = null;
+    public DeckFilterPanel deckFilterPanel = null;
 
     public void Awake()
     {
@@ -34,6 +35,7 @@ public class UIManager : MonoBehaviour
         startGameButton.onClick.AddListener(() => OpenDeckSelectionPanel());
         confirmationPanel.Initialize();
         deckOptionPanel.Initialize();
+        deckFilterPanel.Initialize();
     }
 
     public void ShowConfirmationDialog(string message, Action action)

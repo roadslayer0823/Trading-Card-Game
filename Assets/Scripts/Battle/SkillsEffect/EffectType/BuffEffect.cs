@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text.RegularExpressions;
 
 public class BuffEffect : EffectBase
 {
@@ -8,30 +7,57 @@ public class BuffEffect : EffectBase
     {
         if (context.target?.type != EffectTargetType.Card || context.target.card == null) return;
 
-        string raw = context.rawValue;
-        var atkMatch = Regex.Match(raw, @"(Damage|ATK)\s*\+(\d+)", RegexOptions.IgnoreCase);
-        if (atkMatch.Success)
+        CardDisplay targetCard = context.target.card;
+        string raw = context.rawValue.Trim();
+
+        Debug.Log($"[BuffEffect] 收到 rawValue: '{raw}'");
+
+        if (raw.Contains("ATK") || raw.Contains("Damage"))
         {
-            int value = int.Parse(atkMatch.Groups[2].Value);
-            CardDisplay targetCard = context.target.card;
-            targetCard.tempAtkBuff += value;
-            targetCard.RefreshAtk();
-            Debug.Log($"[Buff] {targetCard.cardName} 攻击力 +{value} (当前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
-            return;
+            int value = ExtractNumber(raw);
+            if (value != 0)
+            {
+                targetCard.tempAtkBuff += value;
+                targetCard.RefreshAtk();
+                Debug.Log($"[Buff] {targetCard.cardName} 攻擊力 +{value} (目前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
+            }
+        }
+        else if (raw.Contains("HP"))
+        {
+            int value = ExtractNumber(raw);
+            if(value != 0)
+            {
+                targetCard.tempHpBuff += value;
+                targetCard.maxHpPoint += value;
+
+                targetCard.Heal(value);
+
+                // 額外更新顯示（顯示加成）
+                if (targetCard.hpText != null)
+                {
+                    targetCard.hpText.text = $"{targetCard.hpPoint} (+{targetCard.tempHpBuff})";
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
+                }
+
+                LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
+                Debug.Log($"[Buff HP] {targetCard.cardName} HP 上限 +{value} (新上限: {targetCard.maxHpPoint})");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[BuffEffect] 無法解析的 Buff 格式: {raw}");
+        }
+    }
+
+    private int ExtractNumber(string raw)
+    {
+        string numStr = "";
+        foreach(char c in raw)
+        {
+            if (char.IsDigit(c) || c == '-')
+                numStr += c;
         }
 
-        var hpMatch = Regex.Match(raw, @"HP\s*\+(\d+)", RegexOptions.IgnoreCase);
-        if(hpMatch.Success)
-        {
-            int value = int.Parse(hpMatch.Groups[1].Value);
-            CardDisplay targetCard = context.target.card;
-            targetCard.tempHpBuff += value;
-            targetCard.maxHpPoint += value;
-            targetCard.hpPoint = targetCard.maxHpPoint;
-            targetCard.hpText.text = $"{targetCard.hpPoint} (+{targetCard.tempHpBuff})";  // UI 显示加成
-            LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
-            Debug.Log($"[Buff HP] {targetCard.cardName} HP +{value} (新上限 {targetCard.maxHpPoint})");
-            return;
-        }
+        return int.TryParse(numStr, out int value) ? value : 0;
     }
 }

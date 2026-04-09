@@ -1,186 +1,205 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
 public static class TargetSelector
 {
+    private static readonly Dictionary<string, Func<string, Owner, EffectContext, CardDisplay, List<EffectTarget>>> _targetHandlers = new();
+
+    static TargetSelector()
+    {
+        RegisterAllTargetHandlers();
+    }
+
+    private static void RegisterAllTargetHandlers()
+    {
+        _targetHandlers["SingleEnemy"] = HandleSingleEnemy;
+        _targetHandlers["AllEnemies"] = HandleAllEnemies;
+        _targetHandlers["RandomEnemy"] = HandleRandomEnemy;
+        _targetHandlers["RandomEnemies"] = HandleRandomEnemies;
+        _targetHandlers["Enemies"] = HandleRandomEnemies;   // 同上
+        _targetHandlers["HitTarget"] = HandleHitTarget;
+        _targetHandlers["AllAllies"] = HandleAllAllies;
+        _targetHandlers["NearbyAllies"] = HandleNearbyAllies;
+        _targetHandlers["Self"] = HandleSelf;
+        _targetHandlers["AreaAroundSelf"] = HandleAreaAroundSelf;
+        _targetHandlers["Leader"] = HandleLeader;
+        _targetHandlers["All"] = HandleAll;
+        _targetHandlers["SingleAlly"] = HandleSingleAlly;
+    }
+
     public static List<EffectTarget> GetTargets(string targetType, Owner owner, EffectContext context = null, CardDisplay sourceCard = null)
     {
-        List<EffectTarget> results = new();
-        string baseType = Regex.Replace(targetType, @"\([^)]*\)", "");
+        if (string.IsNullOrEmpty(targetType))
+            return new List<EffectTarget>();
+
+        // 處理帶數字的格式，例如 "RandomEnemies(2)"
+        string baseType = System.Text.RegularExpressions.Regex.Replace(targetType, @"\([^)]*\)", "");
         int number = ExtractNumberInParentheses(targetType);
 
-        List<CardDisplay> enemyCards = BattleManager.Instance.GetEnemyUnits(owner);
-        List<CardDisplay> playerCards = BattleManager.Instance.GetAllyUnits(owner);
-        HealthPointHandler enemyLeader = owner == Owner.Player ? BattleManager.Instance.enemyHealth : BattleManager.Instance.playerHealth;
-        HealthPointHandler playerLeader = owner == Owner.Player ? BattleManager.Instance.playerHealth : BattleManager.Instance.enemyHealth;
-
-        var validPool = enemyCards.Where(c => !c.IsUntargetable()).ToList();
-
-        switch (baseType)
+        if (_targetHandlers.TryGetValue(baseType, out var handler))
         {
-            case "SingleEnemy":
-                var validEnemies = enemyCards.Where(c => !c.IsUntargetable()).ToList();
-                if(validEnemies.Count > 0)
-                {
-                    var pick = enemyCards[Random.Range(0, enemyCards.Count)];
-                    results.Add(EffectTarget.FromCard(pick));
-                }
-                break;
+            var results = handler(targetType, owner, context, sourceCard);
 
-            case "AllEnemies":
-                foreach (var c in enemyCards.Where(c => !c.IsUntargetable()))
-                    results.Add(EffectTarget.FromCard(c));
-                break;
+            // 如果有指定數量，則限制數量（RandomEnemies 等會自己處理，這裡是保險）
+            if (number > 1 && results.Count > number)
+                results = results.GetRange(0, number);
 
-            case "RandomEnemy":
-                Debug.Log($"[TargetSelector] RandomEnemy - owner={owner}, enemyCards.Count={enemyCards.Count}, validPool.Count={validPool.Count}");
-                if (validPool.Count > 0)
-                {
-                    var pick = validPool[Random.Range(0, validPool.Count)];
-                    results.Add(EffectTarget.FromCard(pick));
-                    Debug.Log($"[TargetSelector] RandomEnemy 選中: {pick.cardName}");
-                }
-                else
-                {
-                    Debug.LogWarning("[TargetSelector] RandomEnemy 沒有有效目標");
-                }
-            break;
-
-            case "RandomEnemies":
-            case "Enemies":
-                {
-                    int count = Mathf.Min(number, enemyCards.Count);
-                    var pool = new List<CardDisplay>(validPool);
-                    for(int i = 0; i < count && pool.Count > 0; i++)
-                    {
-                        int index = Random.Range(0, pool.Count);
-                        results.Add(EffectTarget.FromCard(pool[index]));
-                        pool.RemoveAt(index);
-                    }
-                }
-                break;
-
-            case "HitTarget":
-                if (context.attacker != null)
-                {
-                    results.Add(EffectTarget.FromCard(context.attacker));
-                    Debug.Log($"[TargetSelector] HitTarget 選中攻擊者: {context.attacker.cardName}");
-                }
-                else
-                {
-                    Debug.LogWarning("[TargetSelector] HitTarget 找不到攻擊者 (context.target null)");
-                }
-                break;
-
-            case "AllAllies":
-                foreach (var item in playerCards.Where(item => !item.IsUntargetable()))
-                    results.Add(EffectTarget.FromCard(item));
-                break;
-
-            case "NearbyAllies":
-                if (sourceCard == null)
-                {
-                    Debug.LogError("[NearbyAllies] sourceCard 為 null，無法計算相鄰");
-                    return results;
-                }
-                List<CardDisplay> allies = BattleManager.Instance.GetAllyUnits(owner);
-
-                FieldSlot selfSlot = sourceCard.GetComponentInParent<FieldSlot>();
-                if(selfSlot == null || selfSlot.slotIndex < 0)
-                {
-                    Debug.LogWarning("[TargetSelector] NearbyAllies 找不到自己 slotIndex，跳過");
-                    break;
-                }
-
-                int selfIndex = selfSlot.slotIndex;
-                foreach(var ally in allies)
-                {
-                    FieldSlot allySlot = ally.GetComponentInParent<FieldSlot>();
-                    if (allySlot == null || allySlot.slotIndex < 0) continue;
-
-                    int allyIndex = allySlot.slotIndex;
-                    if(Mathf.Abs(allyIndex - selfIndex) == 1)
-                    {
-                        results.Add(EffectTarget.FromCard(ally));
-                        Debug.Log($"[TargetSelector] NearbyAllies 選中相鄰盟友: {ally.cardName} (索引 {allyIndex})");
-                    }
-                }
-
-                if (results.Count == 0)
-                {
-                    Debug.Log("[TargetSelector] NearbyAllies 沒有相鄰盟友");
-                }
-                break;
-
-            case "Self":
-                if (sourceCard != null)
-                    results.Add(EffectTarget.FromCard(sourceCard));
-                else
-                    Debug.LogWarning("[TargetSelector] Self target requested but no source card in context");
-                break;
-
-            case "AreaAroundSelf":
-                foreach (var c in playerCards.Where(c => !c.IsUntargetable())) results.Add(EffectTarget.FromCard(c));
-                foreach (var c in enemyCards.Where(c => !c.IsUntargetable())) results.Add(EffectTarget.FromCard(c));
-                break;
-
-            case "Leader":
-                results.Add(EffectTarget.FromLeader(enemyLeader));
-                break;
-
-            case "All":
-                // 全场单位（both sides）
-                foreach (var c in playerCards) results.Add(EffectTarget.FromCard(c));
-                foreach (var c in enemyCards) results.Add(EffectTarget.FromCard(c));
-                break;
-
-            case "SingleAlly":
-                if (playerCards.Count > 0)
-                {
-                    var pick = playerCards[Random.Range(0, playerCards.Count)];
-                    results.Add(EffectTarget.FromCard(pick));
-                }
-                break;
-
-            default:
-                Debug.LogWarning($"[TargetSelector] 未识别的 targetType: {targetType}");
-                break;
-
+            Debug.Log($"[TargetSelector] {targetType} -> 选中 {results.Count} 个目標");
+            return results;
         }
-        Debug.Log($"[TargetSelector] {targetType} -> 选中 {results.Count} 个目标");
+
+        Debug.LogWarning($"[TargetSelector] 未識別的目標類型: {targetType}");
+        return new List<EffectTarget>();
+    }
+
+    // ==================== Target Selector Function ====================
+
+    private static List<EffectTarget> HandleSingleEnemy(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var enemies = BattleManager.Instance.GetEnemyUnits(owner).Where(c => !c.IsUntargetable()).ToList();
+        if (enemies.Count == 0) return new List<EffectTarget>();
+
+        var pick = enemies[UnityEngine.Random.Range(0, enemies.Count)];
+        return new List<EffectTarget> { EffectTarget.FromCard(pick) };
+    }
+
+    private static List<EffectTarget> HandleAllEnemies(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        return BattleManager.Instance.GetEnemyUnits(owner)
+            .Where(c => !c.IsUntargetable())
+            .Select(EffectTarget.FromCard)
+            .ToList();
+    }
+
+    private static List<EffectTarget> HandleRandomEnemy(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var valid = BattleManager.Instance.GetEnemyUnits(owner).Where(c => !c.IsUntargetable()).ToList();
+        if (valid.Count == 0) return new List<EffectTarget>();
+
+        var pick = valid[UnityEngine.Random.Range(0, valid.Count)];
+        return new List<EffectTarget> { EffectTarget.FromCard(pick) };
+    }
+
+    private static List<EffectTarget> HandleRandomEnemies(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        int count = ExtractNumberInParentheses(type);
+        var valid = BattleManager.Instance.GetEnemyUnits(owner).Where(c => !c.IsUntargetable()).ToList();
+        count = Mathf.Min(count, valid.Count);
+
+        var pool = new List<CardDisplay>(valid);
+        var results = new List<EffectTarget>();
+
+        for (int i = 0; i < count && pool.Count > 0; i++)
+        {
+            int index = UnityEngine.Random.Range(0, pool.Count);
+            results.Add(EffectTarget.FromCard(pool[index]));
+            pool.RemoveAt(index);
+        }
         return results;
     }
 
-    public static List<CardDisplay> GetSpreadTargets(Owner owner, int count = 2, CardDisplay exclude = null)
+    private static List<EffectTarget> HandleHitTarget(string type, Owner owner, EffectContext ctx, CardDisplay source)
     {
-        List<CardDisplay> allies = BattleManager.Instance.GetAllyUnits(owner);
-        if(exclude != null) allies.Remove(exclude);
+        if (ctx?.attacker != null)
+            return new List<EffectTarget> { EffectTarget.FromCard(ctx.attacker) };
+        return new List<EffectTarget>();
+    }
 
-        List<CardDisplay> selected = new List<CardDisplay>();
-        count = Mathf.Min(count, allies.Count);
+    private static List<EffectTarget> HandleAllAllies(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        return BattleManager.Instance.GetAllyUnits(owner)
+            .Where(c => !c.IsUntargetable())
+            .Select(EffectTarget.FromCard)
+            .ToList();
+    }
 
-        List<CardDisplay> pool = new List<CardDisplay>(allies);
-        for (int i = 0; i < count && pool.Count > 0; i++)
+    private static List<EffectTarget> HandleNearbyAllies(string type, Owner owner, EffectContext ctx, CardDisplay sourceCard)
+    {
+        if (sourceCard == null) return new List<EffectTarget>();
+
+        var results = new List<EffectTarget>();
+        var allies = BattleManager.Instance.GetAllyUnits(owner);
+        FieldSlot selfSlot = sourceCard.GetComponentInParent<FieldSlot>();
+
+        if (selfSlot == null) return results;
+
+        foreach (var ally in allies)
         {
-            int index = Random.Range(0, pool.Count);
-            selected.Add(pool[index]);
-            pool.RemoveAt(index);   
+            var allySlot = ally.GetComponentInParent<FieldSlot>();
+            if (allySlot != null && Mathf.Abs(allySlot.slotIndex - selfSlot.slotIndex) == 1)
+            {
+                results.Add(EffectTarget.FromCard(ally));
+            }
         }
+        return results;
+    }
 
-        return selected;
+    private static List<EffectTarget> HandleSelf(string type, Owner owner, EffectContext ctx, CardDisplay sourceCard)
+    {
+        if (sourceCard != null)
+            return new List<EffectTarget> { EffectTarget.FromCard(sourceCard) };
+        return new List<EffectTarget>();
+    }
+
+    private static List<EffectTarget> HandleAreaAroundSelf(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var results = new List<EffectTarget>();
+        results.AddRange(HandleAllAllies(type, owner, ctx, source));
+        results.AddRange(HandleAllEnemies(type, owner, ctx, source));
+        return results;
+    }
+
+    private static List<EffectTarget> HandleLeader(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var leader = owner == Owner.Player ? BattleManager.Instance.enemyHealth : BattleManager.Instance.playerHealth;
+        return new List<EffectTarget> { EffectTarget.FromLeader(leader) };
+    }
+
+    private static List<EffectTarget> HandleAll(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var results = new List<EffectTarget>();
+        results.AddRange(HandleAllAllies(type, owner, ctx, source));
+        results.AddRange(HandleAllEnemies(type, owner, ctx, source));
+        return results;
+    }
+
+    private static List<EffectTarget> HandleSingleAlly(string type, Owner owner, EffectContext ctx, CardDisplay source)
+    {
+        var allies = BattleManager.Instance.GetAllyUnits(owner).Where(c => !c.IsUntargetable()).ToList();
+        if (allies.Count == 0) return new List<EffectTarget>();
+
+        var pick = allies[UnityEngine.Random.Range(0, allies.Count)];
+        return new List<EffectTarget> { EffectTarget.FromCard(pick) };
     }
 
     private static int ExtractNumberInParentheses(string input)
     {
-        var m = Regex.Match(input, @"\((\d+)\)");
+        var m = System.Text.RegularExpressions.Regex.Match(input, @"\((\d+)\)");
         return m.Success ? int.Parse(m.Groups[1].Value) : 1;
+    }
+
+    public static List<CardDisplay> GetSpreadTargets(Owner owner, int count = 2, CardDisplay exclude = null)
+    {
+        var allies = BattleManager.Instance.GetAllyUnits(owner);
+        if (exclude != null) allies.Remove(exclude);
+
+        var selected = new List<CardDisplay>();
+        count = Mathf.Min(count, allies.Count);
+
+        var pool = new List<CardDisplay>(allies);
+        for (int i = 0; i < count && pool.Count > 0; i++)
+        {
+            int index = UnityEngine.Random.Range(0, pool.Count);
+            selected.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
+        return selected;
     }
 
     public static bool HasValidTargets(string targetType, Owner owner, EffectContext context = null, CardDisplay sourceCard = null)
     {
-        var targets = GetTargets(targetType, owner, context, sourceCard);
-        return targets.Count > 0;
+        return GetTargets(targetType, owner, context, sourceCard).Count > 0;
     }
 }

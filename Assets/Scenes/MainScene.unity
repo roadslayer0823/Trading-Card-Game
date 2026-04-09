@@ -2794,7 +2794,7 @@ MonoBehaviour:
   startGameButton: {fileID: 771232142}
   confirmationPanel: {fileID: 484440273}
   deckOptionPanel: {fileID: 339295237}
-  deckFilterPanel: {fileID: 0}
+  deckFilterPanel: {fileID: 359373719}
 --- !u!4 &772626222
 Transform:
   m_ObjectHideFlags: 0

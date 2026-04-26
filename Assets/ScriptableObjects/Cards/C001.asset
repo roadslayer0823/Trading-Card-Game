@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c856b1fde1eb30749bb63f21562908d4, type: 3}
+  m_Name: C001
+  m_EditorClassIdentifier: 
+  id: C001
+  cardName: Flame Hound
+  element: Fire
+  type: Monster
+  skillType: Passive
+  cost: 3
+  atk: 4
+  hp: 6
+  cardSprite: {fileID: 0}
+  cardCount: 3
+  skillText: 'EachTurn: Deal 5 fire damage to all enemies.'
+  triggers:
+  - skillTiming: PerTurn
+    skillTarget: AllEnemies
+    effects:
+    - type: Damage
+      value: 5
+      stat: 
+      status: 
+    description: 'EachTurn: Deal 5 fire damage to all enemies.'

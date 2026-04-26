@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c856b1fde1eb30749bb63f21562908d4, type: 3}
+  m_Name: C007
+  m_EditorClassIdentifier: 
+  id: C007
+  cardName: Thunderstorm
+  element: Lightning
+  type: Spell
+  skillType: Instant
+  cost: 3
+  atk: 0
+  hp: 0
+  cardSprite: {fileID: 0}
+  cardCount: 3
+  skillText: 'OnPlay: Deal 7 lightning damage to 3 random enemies.'
+  triggers:
+  - skillTiming: OnUse
+    skillTarget: RandomEnemies(3)
+    effects:
+    - type: Damage
+      value: 7
+      stat: 
+      status: 
+    description: 'OnPlay: Deal 7 lightning damage to 3 random enemies.'

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c856b1fde1eb30749bb63f21562908d4, type: 3}
+  m_Name: C013
+  m_EditorClassIdentifier: 
+  id: C013
+  cardName: Shadow Reaper
+  element: Dark
+  type: Monster
+  skillType: OnHit
+  cost: 3
+  atk: 5
+  hp: 4
+  cardSprite: {fileID: 0}
+  cardCount: 3
+  skillText: 'OnHit: Steal 2 HP from the enemy.'
+  triggers:
+  - skillTiming: OnHit
+    skillTarget: HitTarget
+    effects:
+    - type: LifeSteal
+      value: 2
+      stat: 
+      status: 
+    description: 'OnHit: Steal 2 HP from the enemy.'

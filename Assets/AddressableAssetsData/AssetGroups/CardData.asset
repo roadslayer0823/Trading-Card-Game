@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CardData
+  m_EditorClassIdentifier: 
+  m_GroupName: CardData
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 0321e3505f03f6f4b97ae42052942ef0
+  m_SerializeEntries:
+  - m_GUID: f456408f4d3fd954b84b97aa5caa416e
+    m_Address: C001
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d6ab6af6041691408698aec0181501d
+    m_Address: C002
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc7416af55ff3fe4d8dae7256c633a05
+    m_Address: C003
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90b3deaa36f38154b8384ce9c149e865
+    m_Address: C004
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 586444c6ddb82f74ca3777fad7336cbd
+    m_Address: C005
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f72035906287bba4bb4e9eaf98ec60d9
+    m_Address: C006
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 346735953c8163d46960a9f1d6aed96d
+    m_Address: C007
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd7ddd283e1fd634896f9c13d060ce66
+    m_Address: C008
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 44da143c505190646b2015f1b61d14f0
+    m_Address: C009
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50f4f7fe1ed0e384883beb007f3d8caf
+    m_Address: C010
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43677ea65d5d0ae4184bf67720cf1eee
+    m_Address: C011
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e95012811169bc145be5679419671ff4
+    m_Address: C012
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1397c644f195084bab25fd8bca0f6cf
+    m_Address: C013
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b29600cf5b0de94d85159bb2b4b2a9e
+    m_Address: C014
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c75170ebc15342d469df32f6881a2e52
+    m_Address: C015
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2c9c2f6b36d19c458aa7c4c62a4204a
+    m_Address: C016
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06f2fc6dc882c2e48b2c38924c86c1a2
+    m_Address: C017
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cfe7ba2254438514badf76c388936a14
+    m_Address: C018
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdc70b9902a58c74586ca82ef0628942
+    m_Address: C019
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57595cff1791fea49a8d659ddaf32789
+    m_Address: C020
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CardData
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c6c85f211c1e4a24190c39f9f746698c, type: 2}
+  m_SchemaSet:
+    m_Schemas: []

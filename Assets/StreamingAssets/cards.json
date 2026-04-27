@@ -22,11 +22,14 @@
     "triggers": [
       {
         "skillTiming": "PerTurn",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "5"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "5",
+            "subType": null,
+            "value": 5,
+            "duration": 0
+          }
         ],
         "skillTarget": "AllEnemies",
         "description": "EachTurn: Deal 5 fire damage to all enemies."
@@ -56,11 +59,14 @@
     "triggers": [
       {
         "skillTiming": "PerTurn",
-        "skillEffect": [
-          "Heal"
-        ],
-        "skillValue": [
-          "5"
+        "effects": [
+          {
+            "effectType": "Heal",
+            "effectValue": "5",
+            "subType": null,
+            "value": 5,
+            "duration": 0
+          }
         ],
         "skillTarget": "Self",
         "description": "EachTurn: Restore 5 HP."
@@ -90,11 +96,14 @@
     "triggers": [
       {
         "skillTiming": "OnHit",
-        "skillEffect": [
-          "Status"
-        ],
-        "skillValue": [
-          "Freeze(1)"
+        "effects": [
+          {
+            "effectType": "Status",
+            "effectValue": "Freeze(1)",
+            "subType": "Freeze",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "HitTarget",
         "description": "OnHit: Freeze the enemy for 1 turn."
@@ -124,11 +133,14 @@
     "triggers": [
       {
         "skillTiming": "PerTurn",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "6"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "6",
+            "subType": null,
+            "value": 6,
+            "duration": 0
+          }
         ],
         "skillTarget": "RandomEnemy",
         "description": "EachTurn: Deal 6 lightning damage to a random enemy."
@@ -158,11 +170,14 @@
     "triggers": [
       {
         "skillTiming": "OnSummon",
-        "skillEffect": [
-          "DrawCard"
-        ],
-        "skillValue": [
-          "1"
+        "effects": [
+          {
+            "effectType": "DrawCard",
+            "effectValue": "1",
+            "subType": null,
+            "value": 1,
+            "duration": 0
+          }
         ],
         "skillTarget": "Self",
         "description": "OnSummon: Draw 1 card."
@@ -192,11 +207,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "10"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "10",
+            "subType": null,
+            "value": 10,
+            "duration": 0
+          }
         ],
         "skillTarget": "AllEnemies",
         "description": "OnPlay: Deal 10 fire damage to all enemies."
@@ -226,11 +244,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "7"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "7",
+            "subType": null,
+            "value": 7,
+            "duration": 0
+          }
         ],
         "skillTarget": "RandomEnemies(3)",
         "description": "OnPlay: Deal 7 lightning damage to 3 random enemies."
@@ -260,11 +281,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Status"
-        ],
-        "skillValue": [
-          "Freeze(1)"
+        "effects": [
+          {
+            "effectType": "Status",
+            "effectValue": "Freeze(1)",
+            "subType": "Freeze",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "SingleEnemy",
         "description": "OnPlay: Freeze an enemy for 1 turn."
@@ -294,11 +318,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Heal"
-        ],
-        "skillValue": [
-          "15"
+        "effects": [
+          {
+            "effectType": "Heal",
+            "effectValue": "15",
+            "subType": null,
+            "value": 15,
+            "duration": 0
+          }
         ],
         "skillTarget": "AllAllies",
         "description": "OnPlay: Restore 15 HP to all allies."
@@ -328,11 +355,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Status"
-        ],
-        "skillValue": [
-          "Spread(1)"
+        "effects": [
+          {
+            "effectType": "Status",
+            "effectValue": "Spread(1)",
+            "subType": "Spread",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "SingleAlly",
         "description": "OnPlay: Spread element to random 2 ally units.."
@@ -362,11 +392,14 @@
     "triggers": [
       {
         "skillTiming": "OnSummon",
-        "skillEffect": [
-          "DamageReduction"
-        ],
-        "skillValue": [
-          "3"
+        "effects": [
+          {
+            "effectType": "DamageReduction",
+            "effectValue": "3",
+            "subType": null,
+            "value": 3,
+            "duration": 0
+          }
         ],
         "skillTarget": "Self",
         "description": "OnSummon: Gain 3 Damage Reduction."
@@ -396,11 +429,14 @@
     "triggers": [
       {
         "skillTiming": "PerTurn",
-        "skillEffect": [
-          "Heal"
-        ],
-        "skillValue": [
-          "3"
+        "effects": [
+          {
+            "effectType": "Heal",
+            "effectValue": "3",
+            "subType": null,
+            "value": 3,
+            "duration": 0
+          }
         ],
         "skillTarget": "NearbyAllies",
         "description": "EachTurn: Heal nearby allies 3 HP."
@@ -430,11 +466,14 @@
     "triggers": [
       {
         "skillTiming": "OnHit",
-        "skillEffect": [
-          "LifeSteal"
-        ],
-        "skillValue": [
-          "2"
+        "effects": [
+          {
+            "effectType": "LifeSteal",
+            "effectValue": "2",
+            "subType": null,
+            "value": 2,
+            "duration": 0
+          }
         ],
         "skillTarget": "HitTarget",
         "description": "OnHit: Steal 2 HP from the enemy."
@@ -464,11 +503,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "6"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "6",
+            "subType": null,
+            "value": 6,
+            "duration": 0
+          }
         ],
         "skillTarget": "AreaAroundSelf",
         "description": "OnPlay: Deal 6 fire damage to all unit."
@@ -500,13 +542,21 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Damage",
-          "Status"
-        ],
-        "skillValue": [
-          "8",
-          "Stun(1)"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "8",
+            "subType": null,
+            "value": 8,
+            "duration": 0
+          },
+          {
+            "effectType": "Status",
+            "effectValue": "Stun(1)",
+            "subType": "Stun",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "AllEnemies",
         "description": "OnPlay: Deal 8 damage and stun all enemies."
@@ -536,11 +586,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Status"
-        ],
-        "skillValue": [
-          "Stun(1)"
+        "effects": [
+          {
+            "effectType": "Status",
+            "effectValue": "Stun(1)",
+            "subType": "Stun",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "Enemies(2)",
         "description": "OnPlay: Stun 2 enemies for 1 turn."
@@ -570,11 +623,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Buff"
-        ],
-        "skillValue": [
-          "HP +5"
+        "effects": [
+          {
+            "effectType": "Buff",
+            "effectValue": "HP +5",
+            "subType": "HP",
+            "value": 5,
+            "duration": 0
+          }
         ],
         "skillTarget": "SingleAlly",
         "description": "OnPlay: Gain +5 hp"
@@ -604,11 +660,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Buff"
-        ],
-        "skillValue": [
-          "Damage+2"
+        "effects": [
+          {
+            "effectType": "Buff",
+            "effectValue": "Damage+2",
+            "subType": "ATK",
+            "value": 2,
+            "duration": 0
+          }
         ],
         "skillTarget": "AllAllies",
         "description": "OnPlay: All allies gain +2 damage."
@@ -638,11 +697,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Status"
-        ],
-        "skillValue": [
-          "Untargetable(1)"
+        "effects": [
+          {
+            "effectType": "Status",
+            "effectValue": "Untargetable(1)",
+            "subType": "Untargetable",
+            "value": 1,
+            "duration": 1
+          }
         ],
         "skillTarget": "AllAllies",
         "description": "OnPlay: All allies become untargetable for 1 turn."
@@ -672,11 +734,14 @@
     "triggers": [
       {
         "skillTiming": "OnUse",
-        "skillEffect": [
-          "Damage"
-        ],
-        "skillValue": [
-          "12"
+        "effects": [
+          {
+            "effectType": "Damage",
+            "effectValue": "12",
+            "subType": null,
+            "value": 12,
+            "duration": 0
+          }
         ],
         "skillTarget": "AllEnemies",
         "description": "OnPlay: Deal 12 wind damage to all enemies."

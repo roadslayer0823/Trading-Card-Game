@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -81,20 +81,30 @@ public class DataConvertor : MonoBehaviour
             {
                 string timing = (timingIndex < values.Length) ? values[timingIndex].Trim() : "";
                 string target = (targetIndex < values.Length) ? values[targetIndex].Trim() : "";
-                List<string> effects = (effectIndex < values.Length) ? (List<string>)card["skillEffect"] : new List<string>();
-                List<string> vals = (valueIndex < values.Length) ? (List<string>)card["skillValue"] : new List<string>();
+                
+                List<string> effectNames = (effectIndex < values.Length && card.ContainsKey("skillEffect")) ? (List<string>)card["skillEffect"] : new List<string>();
+                List<string> effectValues = (valueIndex < values.Length && card.ContainsKey("skillValue")) ? (List<string>)card["skillValue"] : new List<string>();
 
-                if (!string.IsNullOrEmpty(timing) && effects.Count > 0)
+                if (!string.IsNullOrEmpty(timing) && effectNames.Count > 0)
                 {
-                    // 轉成 TriggerConfig
                     var trigger = new ModelDatas.TriggerConfig
                     {
                         skillTiming = timing,
                         skillTarget = target,
-                        skillEffect = effects,
-                        skillValue = vals,
+                        effects = new List<ModelDatas.EffectData>(),
                         description = (textIndex >= 0 && textIndex < values.Length) ? values[textIndex].Trim() : ""
                     };
+
+                    for (int k = 0; k < effectNames.Count; k++)
+                    {
+                        var effectData = new ModelDatas.EffectData
+                        {
+                            effectType = effectNames[k],
+                            effectValue = (k < effectValues.Count) ? effectValues[k] : ""
+                        };
+                        ParseEffectDetails(effectData);
+                        trigger.effects.Add(effectData);
+                    }
                     triggers.Add(trigger);
                 }
             }
@@ -105,6 +115,41 @@ public class DataConvertor : MonoBehaviour
         }
 
         return JsonConvert.SerializeObject(cardList, Formatting.Indented);
+    }
+
+    private void ParseEffectDetails(ModelDatas.EffectData data)
+    {
+        if (string.IsNullOrEmpty(data.effectValue)) return;
+        string raw = data.effectValue.Trim();
+
+        // 1. Handle Status effects like "Freeze(1)"
+        var statusMatch = System.Text.RegularExpressions.Regex.Match(raw, @"(\w+)\s*\(\s*(\d+)\s*\)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (statusMatch.Success)
+        {
+            data.subType = statusMatch.Groups[1].Value;
+            data.duration = int.Parse(statusMatch.Groups[2].Value);
+            data.value = data.duration; // Fallback for some systems that use value as duration
+            return;
+        }
+
+        // 2. Handle Buff effects like "HP +5" or "Damage+2"
+        if (data.effectType == "Buff")
+        {
+            if (raw.Contains("ATK") || raw.Contains("Damage")) data.subType = "ATK";
+            else if (raw.Contains("HP")) data.subType = "HP";
+        }
+
+        // 3. Extract generic numbers for Damage, Heal, etc.
+        string numStr = "";
+        foreach (char c in raw)
+        {
+            if (char.IsDigit(c) || c == '-') numStr += c;
+        }
+
+        if (int.TryParse(numStr, out int val))
+        {
+            data.value = val;
+        }
     }
 
     private void SaveJsonToFile(string json)

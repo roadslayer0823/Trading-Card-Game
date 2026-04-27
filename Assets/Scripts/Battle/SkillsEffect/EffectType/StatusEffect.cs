@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
@@ -24,17 +24,14 @@ public class StatusEffect : EffectBase
         }
 
         CardDisplay actualTarget = context.target.card;
-        string raw = context.rawValue;
+        string statusType = context.statusName;
+        int duration = context.duration;
 
-        var match = Regex.Match(raw, @"(\w+)\s*\(\s*(\d+)\s*\)", RegexOptions.IgnoreCase);
-        if (!match.Success)
+        if (string.IsNullOrEmpty(statusType))
         {
-            Debug.LogWarning($"[StatusEffect] 格式錯誤: {raw}");
+            Debug.LogWarning($"[StatusEffect] 狀態類型為空，rawValue: {context.rawValue}");
             return;
         }
-
-        string statusType = match.Groups[1].Value;
-        int duration = int.Parse(match.Groups[2].Value);
 
         Debug.Log($"[狀態效果] {source.cardName} → 對 {actualTarget.cardName} 施加 {statusType}({duration}回合)");
 

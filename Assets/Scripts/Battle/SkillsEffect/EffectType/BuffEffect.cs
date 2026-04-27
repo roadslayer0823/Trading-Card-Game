@@ -8,56 +8,35 @@ public class BuffEffect : EffectBase
         if (context.target?.type != EffectTargetType.Card || context.target.card == null) return;
 
         CardDisplay targetCard = context.target.card;
-        string raw = context.rawValue.Trim();
+        string statType = context.statusName;
+        int value = context.value;
 
-        Debug.Log($"[BuffEffect] 收到 rawValue: '{raw}'");
+        Debug.Log($"[BuffEffect] 收到 類型: {statType}, 數值: {value}");
 
-        if (raw.Contains("ATK") || raw.Contains("Damage"))
+        if (statType == "ATK")
         {
-            int value = ExtractNumber(raw);
-            if (value != 0)
-            {
-                targetCard.tempAtkBuff += value;
-                targetCard.RefreshAtk();
-                Debug.Log($"[Buff] {targetCard.cardName} 攻擊力 +{value} (目前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
-            }
+            targetCard.tempAtkBuff += value;
+            targetCard.RefreshAtk();
+            Debug.Log($"[Buff] {targetCard.cardName} 攻擊力 +{value} (目前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
         }
-        else if (raw.Contains("HP"))
+        else if (statType == "HP")
         {
-            int value = ExtractNumber(raw);
-            if(value != 0)
+            targetCard.tempHpBuff += value;
+            targetCard.maxHpPoint += value;
+            targetCard.Heal(value);
+
+            // 額外更新顯示（顯示加成）
+            if (targetCard.hpText != null)
             {
-                targetCard.tempHpBuff += value;
-                targetCard.maxHpPoint += value;
-
-                targetCard.Heal(value);
-
-                // 額外更新顯示（顯示加成）
-                if (targetCard.hpText != null)
-                {
-                    targetCard.hpText.text = $"{targetCard.hpPoint} (+{targetCard.tempHpBuff})";
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
-                }
-
+                targetCard.hpText.text = $"{targetCard.hpPoint} (+{targetCard.tempHpBuff})";
                 LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
-                Debug.Log($"[Buff HP] {targetCard.cardName} HP 上限 +{value} (新上限: {targetCard.maxHpPoint})");
             }
+
+            Debug.Log($"[Buff HP] {targetCard.cardName} HP 上限 +{value} (新上限: {targetCard.maxHpPoint})");
         }
         else
         {
-            Debug.LogWarning($"[BuffEffect] 無法解析的 Buff 格式: {raw}");
+            Debug.LogWarning($"[BuffEffect] 未知或無效的 Buff 類型: {statType}, rawValue: {context.rawValue}");
         }
-    }
-
-    private int ExtractNumber(string raw)
-    {
-        string numStr = "";
-        foreach(char c in raw)
-        {
-            if (char.IsDigit(c) || c == '-')
-                numStr += c;
-        }
-
-        return int.TryParse(numStr, out int value) ? value : 0;
     }
 }

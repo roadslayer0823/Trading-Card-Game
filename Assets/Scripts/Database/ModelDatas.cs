@@ -22,11 +22,20 @@ public class ModelDatas
     }
 
     [Serializable]
+    public class EffectData
+    {
+        public string effectType;
+        public string effectValue;
+        public string subType;  // e.g. "Freeze", "HP"
+        public int value;       // e.g. 5, 8
+        public int duration;    // e.g. 1
+    }
+
+    [Serializable]
     public class TriggerConfig
     {
         public string skillTiming;
-        public List<string> skillEffect;
-        public List<string> skillValue;
+        public List<EffectData> effects = new List<EffectData>();
         public string skillTarget;
         public string description;
     }

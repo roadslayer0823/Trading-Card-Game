@@ -10,13 +10,17 @@ public class EffectExecutor : MonoBehaviour
             List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, source.owner);
             foreach (var target in targets)
             {
-                for(int i = 0; i < trigger.skillEffect.Count; i++)
+                foreach (var effectData in trigger.effects)
                 {
-                    string effectType = trigger.skillEffect[i];
-                    string rawValue = trigger.skillValue[i];
-
-                    EffectBase effect = EffectFactory.CreateEffect(effectType);
-                    var context = new EffectContext(source.owner, target, null, ParseEffectValue(rawValue), rawValue: rawValue);
+                    EffectBase effect = EffectFactory.CreateEffect(effectData.effectType);
+                    var context = new EffectContext(
+                        sourceOwner: source.owner, 
+                        target: target, 
+                        value: effectData.value, 
+                        statusName: effectData.subType, 
+                        duration: effectData.duration, 
+                        rawValue: effectData.effectValue
+                    );
                     effect.ApplyEffect(source, context);
                 }
             }
@@ -28,19 +32,18 @@ public class EffectExecutor : MonoBehaviour
     {
         foreach(var trigger in data.triggers)
         {
-            for (int i = 0; i < trigger.skillEffect.Count; i++)
+            foreach (var effectData in trigger.effects)
             {
-                string effectType = trigger.skillEffect[i];
-                string rawValue = trigger.skillValue[i];
-
-                EffectBase effect = EffectFactory.CreateEffect(effectType);
+                EffectBase effect = EffectFactory.CreateEffect(effectData.effectType);
                 EffectTarget fakeTarget = EffectTarget.FromCard(manualSource);
 
                 var context = new EffectContext(
                     sourceOwner: spellCard.owner,
                     target: fakeTarget,
-                    value: ParseEffectValue(rawValue),
-                    rawValue: rawValue
+                    value: effectData.value,
+                    statusName: effectData.subType,
+                    duration: effectData.duration,
+                    rawValue: effectData.effectValue
                 );
 
                 effect.ApplyEffect(spellCard, context);
@@ -52,7 +55,7 @@ public class EffectExecutor : MonoBehaviour
     {
         foreach(var trigger in data.triggers)
         {
-            if (trigger.skillEffect == null || trigger.skillEffect.Count == 0) return;
+            if (trigger.effects == null || trigger.effects.Count == 0) continue;
             Debug.Log($"[TriggerMonsterEffect] {sourceCard.cardName} 觸發 {trigger.skillTiming}，目標類型: {trigger.skillTarget}，sourceOwner: {sourceCard.owner}");
 
             List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, sourceCard.owner, context, sourceCard);
@@ -63,31 +66,27 @@ public class EffectExecutor : MonoBehaviour
             }
                            
             Debug.Log($"[TriggerMonsterEffect] 取得目標數: {targets.Count}，類型: {trigger.skillTarget}");
-            for (int i = 0; i < trigger.skillEffect.Count; i++)
+            foreach (var effectData in trigger.effects)
             {
-                string effectType = trigger.skillEffect[i];
-                Debug.Log($"[TriggerMonsterEffect] 嘗試建立效果: {effectType}");
-                string rawValue = trigger.skillValue[i];
-                EffectBase effect = EffectFactory.CreateEffect(effectType);
+                Debug.Log($"[TriggerMonsterEffect] 嘗試建立效果: {effectData.effectType}");
+                EffectBase effect = EffectFactory.CreateEffect(effectData.effectType);
 
                 foreach (var target in targets)
                 {
-                    var targetContext = new EffectContext(sourceCard.owner, target, null, value: ParseEffectValue(rawValue), rawValue: rawValue);
-                    Debug.Log($"[TriggerMonsterEffect] 執行效果 {effectType} 於目標 {target.card?.cardName ?? "無卡"}");
+                    var targetContext = new EffectContext(
+                        sourceOwner: sourceCard.owner, 
+                        target: target, 
+                        attacker: context?.attacker, 
+                        value: effectData.value, 
+                        statusName: effectData.subType, 
+                        duration: effectData.duration, 
+                        rawValue: effectData.effectValue
+                    );
+                    Debug.Log($"[TriggerMonsterEffect] 執行效果 {effectData.effectType} 於目標 {target.card?.cardName ?? "無卡"}");
                     effect.ApplyEffect(sourceCard, targetContext);
                 }
             }
         }
     }
-
-    private static int ParseEffectValue(string raw)
-    {
-        if (int.TryParse(raw, out int val)) return val;
-        if (raw.Contains("("))
-        {
-            string inside = raw.Split('(')[1].Replace(")", "");
-            if (int.TryParse(inside, out int num)) return num;
-        }
-        return 0;
-    }
 }
+

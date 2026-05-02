@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -58,7 +58,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         bool successfullyPlaced;
 
         CardDisplay cardDisplay = GetComponent<CardDisplay>();
-        var data = cardDisplay.GetCardData();
+        var data = cardDisplay.GetCardDataSO();
 
         // 沒有拖到任何有效位置 → 直接回手牌
         if (eventData.pointerEnter == null)
@@ -94,7 +94,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         GetComponent<CardHoverEffect>()?.DisableHover();
     }
 
-    private bool IsManualTargetSpell(CardDisplay cardDisplay, ModelDatas.CardData data)
+    private bool IsManualTargetSpell(CardDisplay cardDisplay, CardDataSO data)
     {
         if (cardDisplay.cardType != "Spell") return false;
 
@@ -106,7 +106,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         return false;
     }
 
-    private bool TryPlayManualTargetSpell(CardDisplay cardDisplay, ModelDatas.CardData data, FieldSlot slot)
+    private bool TryPlayManualTargetSpell(CardDisplay cardDisplay, CardDataSO data, FieldSlot slot)
     {
         CardDisplay target = slot.GetComponentInChildren<CardDisplay>();
 
@@ -132,7 +132,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         return true;
     }
 
-    private bool TryPlayNormalCard(CardDisplay cardDisplay, ModelDatas.CardData data, FieldSlot slot)
+    private bool TryPlayNormalCard(CardDisplay cardDisplay, CardDataSO data, FieldSlot slot)
     {
         // 先檢查位置是否合法
         if (slot.isOccupied)
@@ -174,7 +174,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         return true;
     }
 
-    private bool HasValidAutoTargets(CardDisplay cardDisplay, ModelDatas.CardData data)
+    private bool HasValidAutoTargets(CardDisplay cardDisplay, CardDataSO data)
     {
         if (cardDisplay.cardType != "Spell") return true;  // 怪獸不需要檢查目標
 

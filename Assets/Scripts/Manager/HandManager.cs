@@ -23,7 +23,7 @@ public class HandManager : MonoBehaviour
 
     public void RefreshHandUI(bool isPlayer)
     {
-        List<ModelDatas.CardData> hand = isPlayer ? DeckManager.Instance.playerHand : DeckManager.Instance.enemyHand;
+        List<CardDataSO> hand = isPlayer ? DeckManager.Instance.playerHand : DeckManager.Instance.enemyHand;
         Transform handZone = isPlayer ? playerHandZone : enemyHandZone;
         List<GameObject> cardObjects = isPlayer ? playerCardObjects : enemyCardObjects;
         GameObject prefab = isPlayer ? playerCardPrefab : enemyCardPrefab;
@@ -54,7 +54,7 @@ public class HandManager : MonoBehaviour
         }
     }
 
-    public void DrawCard(ModelDatas.CardData card, bool isPlayer)
+    public void DrawCard(CardDataSO card, bool isPlayer)
     {
         if (card == null) return;
 

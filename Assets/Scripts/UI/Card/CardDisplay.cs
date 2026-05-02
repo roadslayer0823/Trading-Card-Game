@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
@@ -59,7 +59,7 @@ public class CardDisplay : MonoBehaviour
     [HideInInspector] public bool isFrozen = false;
     [HideInInspector] public List<string> elementTags = new();
 
-    private ModelDatas.CardData cardData;
+    private CardDataSO cardDataSO;
     private int frozenTurnRemaining = 0;
 
     private void Update()
@@ -68,7 +68,8 @@ public class CardDisplay : MonoBehaviour
         {
             if (currentZone == CardZone.Hand)
             {
-                bool canPlay = ManaManager.Instance.CanAfford(cardData.cost, owner);
+                int cost = cardDataSO != null ? cardDataSO.cost : 0;
+                bool canPlay = ManaManager.Instance.CanAfford(cost, owner);
                 SetGreyedOut(!canPlay);
             }
             else
@@ -88,10 +89,10 @@ public class CardDisplay : MonoBehaviour
         { "dark",  new Color32(150, 100, 200, 255) },
     };
 
-    public void SetCard(ModelDatas.CardData data, int count = 0, PanelType panel = PanelType.None, CardZone zone = CardZone.None)
+    public void SetCard(CardDataSO data, int count = 0, PanelType panel = PanelType.None, CardZone zone = CardZone.None)
     {
         cardName = data.cardName;
-        cardData = data;
+        cardDataSO = data;
         cardID = data.id;
         currentCount = count;
         currentPanel = panel;
@@ -105,7 +106,7 @@ public class CardDisplay : MonoBehaviour
         elementTags.Add(data.element);
     }
 
-    public void SetupCardUI(ModelDatas.CardData data)
+    public void SetupCardUI(CardDataSO data)
     {
         cardNameText.text = cardName;
         costText.text = data.cost.ToString();
@@ -266,9 +267,9 @@ public class CardDisplay : MonoBehaviour
         isAttack = true;
         GetComponent<CanvasGroup>().alpha = 1f;
     }
-    public ModelDatas.CardData GetCardData()
+    public CardDataSO GetCardDataSO()
     {
-        return cardData;
+        return cardDataSO;
     }
 
     private void SetGreyedOut(bool isGreyed)

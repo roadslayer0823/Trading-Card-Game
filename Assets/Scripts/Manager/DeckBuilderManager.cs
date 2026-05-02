@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
-using static ModelDatas;
 using TMPro;
 
 public enum PanelType {None, Library, Deck}
@@ -23,20 +22,32 @@ public class DeckBuilderManager : MonoBehaviour
 
     private Dictionary<string, CardDisplay> libraryCards = new();
     private Dictionary<string, CardDisplay> deckCards = new();
-    private List<CardData> cardDataList;
+    private List<CardDataSO> cardDataList;
     
     public void Initialize() 
     {
-        LoadCardDataFromJson();
-        SpawnAllCards();
-        UpdateDeckCountUI();
+        Instance = this;
 
         saveDeckButton.onClick.AddListener(() =>
         {
             OnSaveClicked();
         });
 
-        Instance = this;
+        if (DeckManager.Instance.cardPool != null && DeckManager.Instance.cardPool.Count > 0)
+        {
+            LoadDataAndSpawn();
+        }
+        else
+        {
+            DeckManager.Instance.OnCardPoolLoaded += LoadDataAndSpawn;
+        }
+    }
+
+    private void LoadDataAndSpawn()
+    {
+        cardDataList = DeckManager.Instance.cardPool;
+        SpawnAllCards();
+        UpdateDeckCountUI();
     }
 
     private void OnSaveClicked()
@@ -58,25 +69,11 @@ public class DeckBuilderManager : MonoBehaviour
         if (count < maxDeckCount)
         {
             Debug.LogWarning($"卡組只有 {count}/{maxDeckCount} 張，是否仍要儲存？");
-            // 可以加 UI 確認彈窗，暫時直接存
         }
         DeckManager.Instance.SaveCurrentDeckAs(deckName);
         DeckSelectionManager.Instance.RefreshDeckList();
         this.gameObject.SetActive(false);
         Debug.Log($"卡組已儲存：{deckName}");
-    }
-
-    private void LoadCardDataFromJson()
-    {
-        string path = Path.Combine(Application.streamingAssetsPath, "cards.json");
-        if (!File.Exists(path))
-        {
-            return;
-        }
-
-        string json = File.ReadAllText(path);
-        CardData[] cardArray = JsonHelper.FromJson<CardData>(json);
-        cardDataList = new List<CardData>(cardArray);
     }
 
     public void SpawnAllCards()
@@ -86,7 +83,7 @@ public class DeckBuilderManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach(CardData data in cardDataList)
+        foreach(CardDataSO data in cardDataList)
         {
             SpawnCard(data);
         }
@@ -94,7 +91,7 @@ public class DeckBuilderManager : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(libraryGridParent.GetComponent<RectTransform>());
     }
 
-    private void SpawnCard(CardData data)
+    private void SpawnCard(CardDataSO data)
     {
         GameObject prefab = Instantiate(cardPrefab, libraryGridParent);
         prefab.AddComponent<CardDragHandler>();
@@ -172,7 +169,7 @@ public class DeckBuilderManager : MonoBehaviour
         }
         else
         {
-            CardData data = cardDataList.Find(c => c.id == cardID);
+            CardDataSO data = cardDataList.Find(c => c.id == cardID);
             if(data != null)
             {
                 GameObject newCard = Instantiate(cardPrefab, toParent);
@@ -205,7 +202,7 @@ public class DeckBuilderManager : MonoBehaviour
                 string id = kvp.Key;
                 int count = kvp.Value;
 
-                CardData data = cardDataList.Find(c => c.id == id);
+                CardDataSO data = cardDataList.Find(c => c.id == id);
                 if (data == null) continue;
 
                 GameObject cardObj = Instantiate(cardPrefab, deckGridParent);
@@ -232,7 +229,7 @@ public class DeckBuilderManager : MonoBehaviour
 
         var currentDeckDict = DeckManager.Instance.GetCurrentDeck();
 
-        foreach (CardData data in cardDataList)
+        foreach (CardDataSO data in cardDataList)
         {
             // Only spawn cards that have NOT been added to the current deck
             if (!currentDeckDict.ContainsKey(data.id))

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine;
@@ -236,7 +236,7 @@ public class BattleManager : MonoBehaviour
                     card.ResetAttackState();
                 }
 
-                var data = card.GetCardData();
+                var data = card.GetCardDataSO();
                 foreach (var trigger in data.triggers)
                 {
                     if (trigger.skillTiming == "PerTurn" || trigger.skillTiming == "OnTurnEnd")
@@ -260,16 +260,16 @@ public class BattleManager : MonoBehaviour
         bool isPlayer = cardDisplay.owner == Owner.Player;
         var handList = isPlayer ? DeckManager.Instance.playerHand : DeckManager.Instance.enemyHand;
 
-        if (handList.Contains(cardDisplay.GetCardData()))
+        if (handList.Contains(cardDisplay.GetCardDataSO()))
         {
-            handList.Remove(cardDisplay.GetCardData());
+            handList.Remove(cardDisplay.GetCardDataSO());
             Debug.Log($"[BattleManager] Removed {cardDisplay.cardNameText.text} from hand. New hand count: {handList.Count}");
         }
 
         if (cardDisplay.cardType == spellType)
         {
             Debug.Log($"[BattleManager] Spell {cardDisplay.cardNameText.text} 正在发动效果...");
-            EffectExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardData());
+            EffectExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardDataSO());
             var parentSlot = card.transform.parent;
             if (parentSlot != null)
             {
@@ -283,13 +283,13 @@ public class BattleManager : MonoBehaviour
 
         if(cardDisplay.cardType == monsterType)
         {
-            var data = cardDisplay.GetCardData();
+            var data = cardDisplay.GetCardDataSO();
             foreach(var trigger in data.triggers)
             {
                 if (trigger.skillTiming == "OnSummon")
                 {
                     EffectContext summonContext = new EffectContext(cardDisplay.owner, EffectTarget.FromCard(cardDisplay), null, 0, "");
-                    EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardData(), summonContext);
+                    EffectExecutor.TriggerMonsterEffect(cardDisplay, cardDisplay.GetCardDataSO(), summonContext);
                 }
             }
         }
@@ -357,13 +357,13 @@ public class BattleManager : MonoBehaviour
             target.TakeDamage(finalAttackerDmg);
             attacker.TakeDamage(finalTargetDmg);
 
-            var targetData = target.GetCardData();
+            var targetData = target.GetCardDataSO();
             foreach(var trigger in targetData.triggers)
             {
                 if (trigger.skillTiming == "OnHit")
                 {
                     EffectContext hitContext = new EffectContext(attacker.owner, EffectTarget.FromCard(target), attacker, 0, "");  // attacker 作為 context
-                    EffectExecutor.TriggerMonsterEffect(target, target.GetCardData(), hitContext);
+                    EffectExecutor.TriggerMonsterEffect(target, target.GetCardDataSO(), hitContext);
                 }
             }
 
@@ -437,7 +437,7 @@ public class BattleManager : MonoBehaviour
 
                         GameObject cardObj = Instantiate(cardPrefab, slot);
                         CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
-                        ModelDatas.CardData data = cardDisplay.GetCardData();
+                        CardDataSO data = cardDisplay.GetCardDataSO();
                         cardDisplay.cardCountText.gameObject.SetActive(false);
                         cardDisplay.SetCard(card);
                         cardDisplay.currentZone = CardZone.Field;

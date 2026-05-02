@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Newtonsoft.Json;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class DeckManager : MonoBehaviour
 {
     public static DeckManager Instance;
-    public List<ModelDatas.CardData> cardPool = new();
-    public List<ModelDatas.CardData> playerHand = new();
-    public List<ModelDatas.CardData> enemyHand = new();
+    public System.Action OnCardPoolLoaded;
+
+    public List<CardDataSO> cardPool = new();
+    public List<CardDataSO> playerHand = new();
+    public List<CardDataSO> enemyHand = new();
 
     private int maxDeckSize = 30;
     private int maxCopiesPerCard = 3;
@@ -17,9 +21,9 @@ public class DeckManager : MonoBehaviour
 
     private Dictionary<string, int> currentDeck = new();
     private List<ModelDatas.SavedDeck> savedDecks = new List<ModelDatas.SavedDeck>();
-    private List<ModelDatas.CardData> playerDeckList = new();
-    private List<ModelDatas.CardData> enemyDeckList = new();
-    private Dictionary<string, ModelDatas.CardData> cardLookup = new();
+    private List<CardDataSO> playerDeckList = new();
+    private List<CardDataSO> enemyDeckList = new();
+    private Dictionary<string, CardDataSO> cardLookup = new();
 
     public void Awake()
     {
@@ -40,24 +44,25 @@ public class DeckManager : MonoBehaviour
 
     private void LoadCardPool()
     {
-        string path = Path.Combine(Application.streamingAssetsPath, Terminology.CARDS_JSON_NAME);
-        if (!File.Exists(path))
+        Debug.Log("Loading cards via Addressables...");
+        Addressables.LoadAssetsAsync<CardDataSO>("CardData", null).Completed += handle =>
         {
-            Debug.LogError("Card JSON not found: " + path);
-            return;
-        }
-
-        string json = File.ReadAllText(path);
-        cardPool = JsonConvert.DeserializeObject<List<ModelDatas.CardData>>(json);
-
-        cardLookup.Clear();
-        foreach(var card in cardPool)
-        {
-            cardLookup[card.id] = card;
-        }
-
-        Debug.Log($"Loaded {cardPool.Count} cards into pool.");
-        Debug.Log(Application.persistentDataPath + Terminology.CARDS_JSON_NAME);
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                cardPool = new List<CardDataSO>(handle.Result);
+                cardLookup.Clear();
+                foreach (var card in cardPool)
+                {
+                    cardLookup[card.id] = card;
+                }
+                Debug.Log($"Successfully loaded {cardPool.Count} cards via Addressables.");
+                OnCardPoolLoaded?.Invoke();
+            }
+            else
+            {
+                Debug.LogError("Failed to load cards via Addressables. Did you set the 'Cards' label on your ScriptableObjects?");
+            }
+        };
     }
 
     public void GeneratePlayerDeck()
@@ -118,7 +123,7 @@ public class DeckManager : MonoBehaviour
             Debug.Log($"- {card.cardName} [{card.element}]");
         }
     }
-    public ModelDatas.CardData DrawOneCard(bool isPlayer)
+    public CardDataSO DrawOneCard(bool isPlayer)
     {
         var hand = isPlayer ? playerHand : enemyHand;
         var deck = isPlayer ? playerDeckList : enemyDeckList;

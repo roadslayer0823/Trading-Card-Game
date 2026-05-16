@@ -36,6 +36,9 @@ public class UIManager : MonoBehaviour
         confirmationPanel.Initialize();
         deckOptionPanel.Initialize();
         deckFilterPanel.Initialize();
+
+        deckFilterPanel.gameObject.SetActive(false);
+        deckBuilderUI.SetActive(false);
     }
 
     public void ShowConfirmationDialog(string message, Action action)

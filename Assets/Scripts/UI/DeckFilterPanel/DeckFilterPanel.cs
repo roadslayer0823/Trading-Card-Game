@@ -1,26 +1,32 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class DeckFilterPanel : MonoBehaviour
 {
     [SerializeField] private Transform content;
+    [SerializeField] private Image backgroundImage;
     [SerializeField] private GameObject filterCategoryPrefab;
-
-    private DeckBuilderManager deckBuilder;
 
     public void Initialize()
     {
-        deckBuilder = DeckBuilderManager.Instance;
-        if (deckBuilder == null) return;
-        
+        if(backgroundImage != null)
+        {
+            EventTrigger trigger = backgroundImage.gameObject.GetComponent<EventTrigger>();
+            if (trigger == null) trigger = backgroundImage.gameObject.AddComponent<EventTrigger>();
+
+            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            entry.callback.AddListener((data) => { CloseFilterPanel(); });
+            trigger.triggers.Add(entry);
+        }
+
         ClearContent();
         CreateElementCategory();
         CreateCostCategory();
         CreateCardTypeCategory();
 
-         LayoutRebuilder.ForceRebuildLayoutImmediate(content.GetComponent<RectTransform>());
+        RefreshTotalContentHeight();
     }
-
     private void ClearContent()
     {
         foreach(Transform child in content)
@@ -77,5 +83,31 @@ public class DeckFilterPanel : MonoBehaviour
         FilterCategoryPrefab category = obj.GetComponent<FilterCategoryPrefab>();
         category.Setup(categoryName);
         return category;
+    }
+
+    private void RefreshTotalContentHeight()
+    {
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content.GetComponent<RectTransform>());
+
+        float totalHeight = 0f;
+
+        foreach(Transform child in content)
+        {
+            RectTransform categoryRect = child.GetComponent<RectTransform>();
+            if(categoryRect != null)
+            {
+                totalHeight += categoryRect.rect.height + 60;
+                Debug.Log("totalHeight: " + totalHeight);
+            }
+        }
+
+        RectTransform contentRect = content.GetComponent<RectTransform>();
+        contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, totalHeight);
+    }
+
+    private void CloseFilterPanel()
+    {
+        this.gameObject.SetActive(false);
     }
 }

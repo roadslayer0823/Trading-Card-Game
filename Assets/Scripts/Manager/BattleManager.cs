@@ -60,6 +60,11 @@ public class BattleManager : MonoBehaviour
     //Battle
     public void StartGame()
     {
+        gameEnded = false;
+        ClearFieldZone(playerFieldZone);
+        ClearFieldZone(enemyFieldZone);
+        if (enemyCurrentBehaviour != null) enemyCurrentBehaviour.text = "";
+
         DeckManager.Instance.GeneratePlayerDeck();
         DeckManager.Instance.GenerateEnemyDeck();
         ManaManager.Instance.ResetMana();
@@ -68,6 +73,26 @@ public class BattleManager : MonoBehaviour
         gameOverPanel.SetActive(false);
 
         StartBattle();
+    }
+
+    private void ClearFieldZone(Transform fieldZone)
+    {
+        foreach (Transform slot in fieldZone)
+        {
+            var fieldSlot = slot.GetComponent<FieldSlot>();
+            if (fieldSlot != null)
+            {
+                fieldSlot.isOccupied = false;
+            }
+
+            foreach (Transform child in slot)
+            {
+                if (child.GetComponent<CardDisplay>() != null)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
     }
 
     private void StartBattle()

@@ -1082,7 +1082,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 300}
+  m_SizeDelta: {x: 0, y: 1080}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &199849104
 MonoBehaviour:
@@ -1280,10 +1280,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 1018646885221582690, guid: 9a37598887eb6ae4cb35a06654d4a0a5, type: 3}
+  filterPanel: {fileID: 0}
   libraryGridParent: {fileID: 1526465981}
   deckGridParent: {fileID: 939799414}
   deckCountText: {fileID: 1986012311}
   saveDeckButton: {fileID: 1339189696}
+  filterPanelButton: {fileID: 0}
   deckNameInput: {fileID: 187170303}
   currentDeckCount: 0
   maxDeckCount: 30
@@ -1370,7 +1372,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &359373718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1405,6 +1407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   content: {fileID: 199849103}
+  backgroundImage: {fileID: 991735197}
   filterCategoryPrefab: {fileID: 6740694567462778350, guid: 245e88acac043124d8e98cdaf71a15c2, type: 3}
 --- !u!1 &369089491
 GameObject:
@@ -1821,13 +1824,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 199849103}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 10
   m_Viewport: {fileID: 1181549819}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 0}
@@ -2145,7 +2148,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &638950125
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2182,10 +2185,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 1018646885221582690, guid: 9a37598887eb6ae4cb35a06654d4a0a5, type: 3}
+  filterPanel: {fileID: 359373717}
   libraryGridParent: {fileID: 1526465981}
   deckGridParent: {fileID: 939799414}
   deckCountText: {fileID: 1986012311}
   saveDeckButton: {fileID: 1339189696}
+  filterPanelButton: {fileID: 1545782813}
   deckNameInput: {fileID: 187170303}
   currentDeckCount: 0
   maxDeckCount: 30
@@ -3788,7 +3793,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &939799415
 MonoBehaviour:
@@ -3946,7 +3951,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.39215687}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4319,7 +4324,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -330, y: -33}
-  m_SizeDelta: {x: 611.63, y: 111.72}
+  m_SizeDelta: {x: 0, y: 111.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1236488091
 MonoBehaviour:
@@ -4952,7 +4957,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1526465982
 MonoBehaviour:
@@ -5747,9 +5752,9 @@ RectTransform:
   - {fileID: 1949811082}
   m_Father: {fileID: 338699419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1440, y: -50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 960, y: 864}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1710582863
@@ -5950,7 +5955,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -318, y: -31}
-  m_SizeDelta: {x: 600.01, y: 50}
+  m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1815085706
 MonoBehaviour:
@@ -6671,7 +6676,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 1050, y: -23}
-  m_SizeDelta: {x: 268.03, y: 50}
+  m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1986012311
 MonoBehaviour:
@@ -7096,9 +7101,9 @@ RectTransform:
   - {fileID: 419029981}
   m_Father: {fileID: 338699419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 480, y: -50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 960, y: 864}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2118572774

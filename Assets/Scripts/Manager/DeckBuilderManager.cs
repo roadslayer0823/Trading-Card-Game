@@ -11,10 +11,12 @@ public class DeckBuilderManager : MonoBehaviour
     
     [Header("UI References")]
     [SerializeField] private GameObject cardPrefab;
+     [SerializeField] private GameObject filterPanel;
     [SerializeField] private Transform libraryGridParent;
     [SerializeField] private Transform deckGridParent;
     [SerializeField] private TMP_Text deckCountText;
     [SerializeField] private Button saveDeckButton;
+    [SerializeField] private Button filterPanelButton;
     [SerializeField] private TMP_InputField deckNameInput;
 
     [HideInInspector] public int currentDeckCount = 0;
@@ -31,6 +33,11 @@ public class DeckBuilderManager : MonoBehaviour
         saveDeckButton.onClick.AddListener(() =>
         {
             OnSaveClicked();
+        });
+
+        filterPanelButton.onClick.AddListener(() =>
+        {
+            OpenFilterPanel(); 
         });
 
         if (DeckManager.Instance.cardPool != null && DeckManager.Instance.cardPool.Count > 0)
@@ -76,23 +83,43 @@ public class DeckBuilderManager : MonoBehaviour
         Debug.Log($"卡組已儲存：{deckName}");
     }
 
+    private void OpenFilterPanel()
+    {
+        filterPanel.SetActive(true);
+    }
+
     public void SpawnAllCards()
     {
         foreach(Transform child in libraryGridParent)
         {
             Destroy(child.gameObject);
         }
+        libraryCards.Clear();
+
+        var currentDeckDict = DeckManager.Instance.GetCurrentDeck();
 
         foreach(CardDataSO data in cardDataList)
         {
-            SpawnCard(data);
+            int usedCount = 0;
+            if (currentDeckDict != null && currentDeckDict.ContainsKey(data.id))
+            {
+                usedCount = currentDeckDict[data.id];
+            }
+
+            int remainingCount = data.cardCount - usedCount;
+            if (remainingCount > 0)
+            {
+                SpawnCard(data, remainingCount);
+            }
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(libraryGridParent.GetComponent<RectTransform>());
     }
 
-    private void SpawnCard(CardDataSO data)
+    private void SpawnCard(CardDataSO data, int overrideCount = -1)
     {
+        int countToUse = overrideCount >= 0 ? overrideCount : data.cardCount;
+
         GameObject prefab = Instantiate(cardPrefab, libraryGridParent);
         prefab.AddComponent<CardDragHandler>();
         prefab.transform.localScale = Vector3.one;
@@ -101,9 +128,9 @@ public class DeckBuilderManager : MonoBehaviour
 
         if(display != null)
         {
-            display.SetCard(data, data.cardCount, PanelType.Library);
+            display.SetCard(data, countToUse, PanelType.Library);
             display.SetupCardUI(data);
-            libraryCards.Add(data.id, display);
+            libraryCards[data.id] = display;
         }
         else
         {
@@ -221,23 +248,19 @@ public class DeckBuilderManager : MonoBehaviour
 
     private void RefreshLibraryForEdit()
     {
-        foreach(Transform child in libraryGridParent)
-        {
-            Destroy(child.gameObject);
-        }
-        libraryCards.Clear();
+        SpawnAllCards();
+    }
 
-        var currentDeckDict = DeckManager.Instance.GetCurrentDeck();
+    public void CreateNewDeck()
+    {
+        DeckManager.Instance.ClearCurrentDeck();
+        deckNameInput.text = "";
 
-        foreach (CardDataSO data in cardDataList)
-        {
-            // Only spawn cards that have NOT been added to the current deck
-            if (!currentDeckDict.ContainsKey(data.id))
-            {
-                SpawnCard(data);   // uses full data.cardCount as before
-            }
-        }
+        foreach (Transform child in deckGridParent) Destroy(child.gameObject);
+        deckCards.Clear();
+        currentDeckCount = 0;
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(libraryGridParent.GetComponent<RectTransform>());
+        SpawnAllCards();
+        UpdateDeckCountUI();
     }
 }

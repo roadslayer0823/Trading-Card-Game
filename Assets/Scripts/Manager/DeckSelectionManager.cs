@@ -88,6 +88,7 @@ public class DeckSelectionManager : MonoBehaviour
 
     private void OnCreateClicked()
     {
+        DeckBuilderManager.Instance.CreateNewDeck();
         UIManager.Instance.OpenDeckBuilderPanel();
     }
 

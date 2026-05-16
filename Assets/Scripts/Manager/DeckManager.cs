@@ -269,6 +269,10 @@ public class DeckManager : MonoBehaviour
     }
 
     public Dictionary<string, int> GetCurrentDeck() => currentDeck;
+    public void ClearCurrentDeck()
+    {
+        currentDeck.Clear();
+    }
     public List<ModelDatas.SavedDeck> GetAllSavedDecks()
     {
         return savedDecks;

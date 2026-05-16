@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1066953540281955330}
   - component: {fileID: 9163244782301979590}
   - component: {fileID: 7322842669575694281}
-  - component: {fileID: 1023196569773579336}
+  - component: {fileID: 8934777632598402453}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -35,9 +35,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 131.4, y: -68.015}
+  m_AnchoredPosition: {x: 20, y: 0}
   m_SizeDelta: {x: 242.8, y: 136.03}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &9163244782301979590
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &1023196569773579336
+--- !u!114 &8934777632598402453
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -160,6 +160,7 @@ GameObject:
   - component: {fileID: 2852662138170427816}
   - component: {fileID: 4818117525383708844}
   - component: {fileID: 5227435237724758428}
+  - component: {fileID: 7212437802713705019}
   m_Layer: 5
   m_Name: FilterCategoryPrefab
   m_TagString: Untagged
@@ -186,7 +187,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 400, y: -50}
-  m_SizeDelta: {x: 800, y: 100}
+  m_SizeDelta: {x: 800, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4818117525383708844
 MonoBehaviour:
@@ -201,7 +202,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 10
+    m_Left: 20
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
@@ -229,6 +230,20 @@ MonoBehaviour:
   categoryTitle: {fileID: 7322842669575694281}
   buttonContainer: {fileID: 5555194015056585905}
   filterButtonPrefab: {fileID: 4452554451348659635, guid: 495325dd903f7e443ace8f5d6eeef4d0, type: 3}
+--- !u!114 &7212437802713705019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6740694567462778350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &8534809865107997426
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,6 +254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5555194015056585905}
   - component: {fileID: 6825802534732284554}
+  - component: {fileID: 4797070892410050046}
   m_Layer: 5
   m_Name: ButtonGroup
   m_TagString: Untagged
@@ -260,10 +276,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2852662138170427816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 70, y: -136.03}
+  m_SizeDelta: {x: 100, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6825802534732284554
 MonoBehaviour:
@@ -289,3 +305,17 @@ MonoBehaviour:
   m_Spacing: {x: 100, y: 60}
   m_Constraint: 1
   m_ConstraintCount: 4
+--- !u!114 &4797070892410050046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8534809865107997426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2

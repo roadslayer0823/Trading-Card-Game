@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     public void Start()
     {
         if (DeckManager != null) DeckManager.Initialize();
-        if (UIManager != null) UIManager.Initialize();
         if (DeckBuilderManager != null) DeckBuilderManager.Initialize();
+        if (UIManager != null) UIManager.Initialize();
     }
 }

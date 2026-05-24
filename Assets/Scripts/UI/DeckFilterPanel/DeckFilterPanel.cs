@@ -1,15 +1,23 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class DeckFilterPanel : MonoBehaviour
 {
     [SerializeField] private Transform content;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private GameObject filterCategoryPrefab;
+    [SerializeField] private GameObject clearAllButtonPrefab;
+
+    private DeckBuilderManager deckBuilder;
+    private List<FilterButtonPrefab> allFilterButtons = new List<FilterButtonPrefab>(); 
 
     public void Initialize()
     {
+        deckBuilder = DeckBuilderManager.Instance;
+        if(deckBuilder == null) return;
+
         if(backgroundImage != null)
         {
             EventTrigger trigger = backgroundImage.gameObject.GetComponent<EventTrigger>();
@@ -21,9 +29,12 @@ public class DeckFilterPanel : MonoBehaviour
         }
 
         ClearContent();
+        allFilterButtons.Clear();
+
         CreateElementCategory();
         CreateCostCategory();
         CreateCardTypeCategory();
+        CreateClearAllButton();
 
         RefreshTotalContentHeight();
     }
@@ -43,10 +54,12 @@ public class DeckFilterPanel : MonoBehaviour
 
         foreach(string elem in elements)
         {
-            category.AddButton(elem, () =>
+            string elementName = elem;
+            var btn = category.AddButton(elem, () =>
             {
-                Debug.Log($"Filter: Element = {elem}");
+                deckBuilder.ToggleElementFilter(elementName);
             });
+            if(btn != null) allFilterButtons.Add(btn);
         }
     }
 
@@ -55,10 +68,12 @@ public class DeckFilterPanel : MonoBehaviour
         var category = SetupCategory("Cost");
         for(int i = 1; i <= 8; i++)
         {
-            category.AddButton(i.ToString(), ()=>
+            int cost = i;
+            var btn = category.AddButton(i.ToString(), ()=>
             {
-                Debug.Log($"Filter: Cost = {i}");
+                deckBuilder.ToggleCostFilter(cost);
             });
+            if(btn != null) allFilterButtons.Add(btn);
         }
     }
 
@@ -70,11 +85,32 @@ public class DeckFilterPanel : MonoBehaviour
 
          foreach(string type in types)
          {
-            category.AddButton(type, () =>
+            string cardType = type;
+            var btn = category.AddButton(type, () =>
             {
-                Debug.Log($"Filter: Card Type = {type}");
+                deckBuilder.ToggleCardTypeFilter(cardType);
             });
+            if(btn != null) allFilterButtons.Add(btn);
          }
+    }
+
+    private void CreateClearAllButton()
+    {
+        if(clearAllButtonPrefab == null) return;
+        
+        GameObject obj = Instantiate(clearAllButtonPrefab, content);
+        Button btn = obj.GetComponentInChildren<Button>();
+        if(btn != null)
+        {
+            btn.onClick.AddListener(() =>
+            {
+                deckBuilder.ClearAllFilters();
+                foreach(var btn in allFilterButtons)
+                {
+                    btn.ResetState();
+                }
+            });
+        }
     }
 
     private FilterCategoryPrefab SetupCategory(string categoryName)

@@ -1232,8 +1232,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2118572773}
   - {fileID: 1710582862}
+  - {fileID: 2118572773}
   m_Father: {fileID: 638950125}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -1409,6 +1409,7 @@ MonoBehaviour:
   content: {fileID: 199849103}
   backgroundImage: {fileID: 991735197}
   filterCategoryPrefab: {fileID: 6740694567462778350, guid: 245e88acac043124d8e98cdaf71a15c2, type: 3}
+  clearAllButtonPrefab: {fileID: 2310845952948680700, guid: 2b6f4a01f0f68ce4492c884b9b2c11b4, type: 3}
 --- !u!1 &369089491
 GameObject:
   m_ObjectHideFlags: 0

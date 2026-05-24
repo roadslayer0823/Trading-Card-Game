@@ -16,12 +16,12 @@ public class FilterCategoryPrefab : MonoBehaviour
     public FilterButtonPrefab AddButton(string buttonText, Action onClick)
     {
         GameObject btnObj = Instantiate(filterButtonPrefab, buttonContainer);
-        FilterButtonPrefab btnPrefab = btnObj.GetComponent<FilterButtonPrefab>();
+        FilterButtonPrefab btn = btnObj.GetComponent<FilterButtonPrefab>();
 
-        if(btnObj != null)
+        if(btn != null)
         {
-            btnPrefab.Setup(buttonText, onClick);
+            btn.Setup(buttonText, onClick);
         }
-        return btnPrefab;
+        return btn;
     }
 }

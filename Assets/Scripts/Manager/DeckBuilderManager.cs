@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
 using TMPro;
 
 public enum PanelType {None, Library, Deck}
@@ -11,7 +10,7 @@ public class DeckBuilderManager : MonoBehaviour
     
     [Header("UI References")]
     [SerializeField] private GameObject cardPrefab;
-     [SerializeField] private GameObject filterPanel;
+    [SerializeField] private GameObject filterPanel;
     [SerializeField] private Transform libraryGridParent;
     [SerializeField] private Transform deckGridParent;
     [SerializeField] private TMP_Text deckCountText;
@@ -25,6 +24,11 @@ public class DeckBuilderManager : MonoBehaviour
     private Dictionary<string, CardDisplay> libraryCards = new();
     private Dictionary<string, CardDisplay> deckCards = new();
     private List<CardDataSO> cardDataList;
+
+    //filter panel function
+    private HashSet<string> activeElementFilters = new HashSet<string>();
+    private HashSet<int> activeCostFilters = new HashSet<int>();
+    private HashSet<string> activeTypeFilters = new HashSet<string>();
     
     public void Initialize() 
     {
@@ -53,7 +57,7 @@ public class DeckBuilderManager : MonoBehaviour
     private void LoadDataAndSpawn()
     {
         cardDataList = DeckManager.Instance.cardPool;
-        SpawnAllCards();
+        RefreshCardList();
         UpdateDeckCountUI();
     }
 
@@ -88,7 +92,7 @@ public class DeckBuilderManager : MonoBehaviour
         filterPanel.SetActive(true);
     }
 
-    public void SpawnAllCards()
+    public void RefreshCardList()
     {
         foreach(Transform child in libraryGridParent)
         {
@@ -100,6 +104,25 @@ public class DeckBuilderManager : MonoBehaviour
 
         foreach(CardDataSO data in cardDataList)
         {
+            bool match = true;
+
+            if(activeElementFilters.Count > 0)
+            {
+                match &= activeElementFilters.Contains(data.element);
+            }
+
+            if(activeCostFilters.Count > 0)
+            {
+                match &= activeCostFilters.Contains(data.cost);    
+            }
+
+            if(activeTypeFilters.Count > 0)
+            {
+                match &= activeTypeFilters.Contains(data.type);
+            }
+
+            if(!match) continue;
+
             int usedCount = 0;
             if (currentDeckDict != null && currentDeckDict.ContainsKey(data.id))
             {
@@ -241,14 +264,9 @@ public class DeckBuilderManager : MonoBehaviour
 
                 currentDeckCount += count;
             }
-            RefreshLibraryForEdit();
+            RefreshCardList();
             UpdateDeckCountUI();
         }
-    }
-
-    private void RefreshLibraryForEdit()
-    {
-        SpawnAllCards();
     }
 
     public void CreateNewDeck()
@@ -260,7 +278,46 @@ public class DeckBuilderManager : MonoBehaviour
         deckCards.Clear();
         currentDeckCount = 0;
 
-        SpawnAllCards();
+        RefreshCardList();
         UpdateDeckCountUI();
+    }
+
+    //filter card function
+    public void ToggleElementFilter(string element)
+    {
+        if(activeElementFilters.Contains(element))
+        activeElementFilters.Remove(element);
+        else
+        activeElementFilters.Add(element);
+
+        RefreshCardList();
+    }
+
+    public void ToggleCostFilter(int cost)
+    {
+        if(activeCostFilters.Contains(cost))
+        activeCostFilters.Remove(cost);
+        else
+        activeCostFilters.Add(cost);
+
+        RefreshCardList();
+    }
+
+    public void ToggleCardTypeFilter(string type)
+    {
+        if(activeTypeFilters.Contains(type))
+        activeTypeFilters.Remove(type);
+        else
+        activeTypeFilters.Add(type);
+
+        RefreshCardList();
+    }
+
+    public void ClearAllFilters()
+    {
+        activeElementFilters.Clear();
+        activeCostFilters.Clear();
+        activeTypeFilters.Clear();
+        RefreshCardList();
     }
 }

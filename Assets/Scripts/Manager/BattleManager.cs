@@ -33,6 +33,10 @@ public class BattleManager : MonoBehaviour
     public bool gameEnded = false;
     public GameObject gameOverPanel;
 
+    [Header("Script Reference")]
+    public FirstTurnIntro firstTurnIntro;
+    public BattleLogUI battleLogUI;
+
     private string monsterType = "Monster";
     private string spellType = "Spell";
     private int startingHandSize = 5;
@@ -54,6 +58,7 @@ public class BattleManager : MonoBehaviour
 
     private void Start()
     {
+        battleLogUI.Initialize();
         StartGame();
     }
 
@@ -106,15 +111,39 @@ public class BattleManager : MonoBehaviour
         DeckManager.Instance.DrawStartHand(startingHandSize, false);
         HandManager.Instance.RefreshHandUI(false);
         ManaManager.Instance.StartTurn(Owner.Enemy);
+
+        // Random coin flip for first turn
+        bool playerGoesFirst = Random.value > 0.5f;
+        
+        StartCoroutine(StartBattleWithIntro(playerGoesFirst));
+    }
+
+    private IEnumerator StartBattleWithIntro(bool playerGoesFirst)
+    {
+        if (firstTurnIntro != null)
+        {
+            yield return StartCoroutine(firstTurnIntro.FlashAndShowResult(playerGoesFirst));
+        }
+
+        if (playerGoesFirst)
+        {
+            StartPlayerTurn();
+        }
+        else
+        {
+            StartEnemyTurn();
+        }
     }
 
     public void StartPlayerTurn()
     {
         UpdateFieldStatus(Owner.Enemy);
         ManaManager.Instance.StartTurn(Owner.Player);
-        Debug.Log($"[BattleManager] Player turn start. Hand count before draw: {DeckManager.Instance.playerHand.Count}");
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogGeneral("<color=yellow>Player's turn started.</color>");
+        }
         DrawOneCard(true);
-        Debug.Log($"[BattleManager] Player hand count after draw: {DeckManager.Instance.playerHand.Count}");
         currentTurn = TurnState.Player;
 
         ResetFieldCards(Owner.Player);
@@ -123,6 +152,10 @@ public class BattleManager : MonoBehaviour
     public void StartEnemyTurn()
     {
         ManaManager.Instance.StartTurn(Owner.Enemy);
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogGeneral("<color=yellow>Enemy's turn started.</color>");
+        }
         DrawOneCard(false);
         currentTurn = TurnState.Enemy;
 
@@ -192,45 +225,47 @@ public class BattleManager : MonoBehaviour
         HashSet<string> attTags = new HashSet<string>(attacker.elementTags.ConvertAll(t => t.ToLower()));
         HashSet<string> defTags = new HashSet<string>(defender.elementTags.ConvertAll(t => t.ToLower()));
 
-        Debug.Log($"[元素反应检查] {attacker.cardName} tags: [{string.Join(", ", attTags)}] → {defender.cardName} tags: [{string.Join(", ", defTags)}] 基础伤害 {baseDamage}");
-
         // 蒸发
         if (attTags.Contains("fire") && defTags.Contains("water"))
         {
-            Debug.Log("⚡ 蒸发反应！伤害 ×1.5");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Vaporize Reaction! <color=white>{attacker.cardName}</color> dealt 1.5x damage to <color=white>{defender.cardName}</color>.");
             return Mathf.CeilToInt(baseDamage * 1.5f);
         }
         if (attTags.Contains("water") && defTags.Contains("fire"))
         {
-            Debug.Log("💨 蒸发反应！伤害 ×2");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Vaporize Reaction! <color=white>{attacker.cardName}</color> dealt 2.0x damage to <color=white>{defender.cardName}</color>.");
             return baseDamage * 2;
         }
 
         // 融化
         if (attTags.Contains("fire") && defTags.Contains("ice"))
         {
-            Debug.Log("🔥 融化反应！伤害 ×2");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Melt Reaction! <color=white>{attacker.cardName}</color> dealt 2.0x damage to <color=white>{defender.cardName}</color>.");
             return baseDamage * 2;
         }
         if (attTags.Contains("ice") && defTags.Contains("fire"))
         {
-            Debug.Log("❄️ 融化反应！伤害 ×1.5");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Melt Reaction! <color=white>{attacker.cardName}</color> dealt 1.5x damage to <color=white>{defender.cardName}</color>.");
             return Mathf.CeilToInt(baseDamage * 1.5f);
         }
 
         // 雷 + 水 = 感电
         if (attTags.Contains("lightning") && defTags.Contains("water"))
         {
-            Debug.Log("⚡ 感电反应！伤害 ×1.5");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Electro-Charged Reaction! <color=white>{attacker.cardName}</color> dealt 1.5x damage to <color=white>{defender.cardName}</color>.");
             return Mathf.CeilToInt(baseDamage * 1.5f);
         }
         if (attTags.Contains("water") && defTags.Contains("lightning"))
         {
-            Debug.Log("💧 感电反应！伤害 ×1.5");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogElementReaction($"Electro-Charged Reaction! <color=white>{attacker.cardName}</color> dealt 1.5x damage to <color=white>{defender.cardName}</color>.");
             return Mathf.CeilToInt(baseDamage * 1.5f);
         }
-
-        // 可以继续加：风 + 任意 = 扩散、超载 等
 
         return baseDamage;
     }
@@ -280,20 +315,21 @@ public class BattleManager : MonoBehaviour
         CardDisplay cardDisplay = card.GetComponent<CardDisplay>();
         if (cardDisplay == null) return;
 
-        Debug.Log($"[BattleManager] 卡牌 {card.gameObject.name} 被打出！");
-
         bool isPlayer = cardDisplay.owner == Owner.Player;
         var handList = isPlayer ? DeckManager.Instance.playerHand : DeckManager.Instance.enemyHand;
 
         if (handList.Contains(cardDisplay.GetCardDataSO()))
         {
             handList.Remove(cardDisplay.GetCardDataSO());
-            Debug.Log($"[BattleManager] Removed {cardDisplay.cardNameText.text} from hand. New hand count: {handList.Count}");
+        }
+
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogGeneral($"<color=white>{(isPlayer ? "Player" : "Enemy")}</color> played card: <color=yellow>{cardDisplay.cardName}</color> ({(cardDisplay.cardType == spellType ? "Spell" : "Monster")}).");
         }
 
         if (cardDisplay.cardType == spellType)
         {
-            Debug.Log($"[BattleManager] Spell {cardDisplay.cardNameText.text} 正在发动效果...");
             EffectExecutor.ExecuteSpell(cardDisplay, cardDisplay.GetCardDataSO());
             var parentSlot = card.transform.parent;
             if (parentSlot != null)
@@ -318,11 +354,6 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
-
-        else
-        {
-            Debug.Log($"[BattleManager] {cardDisplay.cardNameText.text} 是怪兽卡，进入场上。");
-        }
     }
 
     public void Attack(CardDisplay attacker, CardDisplay target = null)
@@ -334,12 +365,14 @@ public class BattleManager : MonoBehaviour
 
         if (!attacker.isAttack)
         {
-            Debug.Log($"{attacker.cardName} 被眩晕或已攻击过，无法行动！");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogStatus($"<color=white>{attacker.cardName}</color> is stunned or has already acted!");
             return;
         }
         if (attacker.isFrozen && (attacker.currentAtkPoint + attacker.tempAtkBuff) <= 0)
         {
-            Debug.Log($"{attacker.cardName} 被冰冻，攻击力为0，无法造成伤害！");
+            if (BattleLogManager.Instance != null)
+                BattleLogManager.Instance.LogStatus($"<color=white>{attacker.cardName}</color> is frozen and has 0 ATK, unable to deal damage!");
             attacker.SetIdleAfterAttack(); // 还是要标记已攻击
             return;
         }
@@ -361,17 +394,22 @@ public class BattleManager : MonoBehaviour
 
             if (hasMonster)
             {
-                Debug.Log("[Attack] 无法直接攻击玩家，必须先消灭敌方怪兽！");
+                if (BattleLogManager.Instance != null)
+                    BattleLogManager.Instance.LogGeneral("Cannot attack the leader directly while enemy monsters are on the field!");
                 return;
             }
 
             if (attacker.owner == Owner.Player)
             {
                 enemyHealth.TakeDamage(attackerDmg);
+                if (BattleLogManager.Instance != null)
+                    BattleLogManager.Instance.LogDamage(attacker.cardName, "Enemy Leader", attackerDmg);
             }
             else
             {
                 playerHealth.TakeDamage(attackerDmg);
+                if (BattleLogManager.Instance != null)
+                    BattleLogManager.Instance.LogDamage(attacker.cardName, "Player Leader", attackerDmg);
             }
         }
         else
@@ -392,7 +430,10 @@ public class BattleManager : MonoBehaviour
                 }
             }
 
-            Debug.Log($"战斗结果: {attacker.cardName} [{string.Join(",", attacker.elementTags)}] → {target.cardName} [{string.Join(",", target.elementTags)}] 造成 {finalAttackerDmg} 伤害");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogDamage(attacker.cardName, target.cardName, finalAttackerDmg);
+            }
         }
         attacker.SetIdleAfterAttack();
         CheckGameOver();
@@ -441,7 +482,6 @@ public class BattleManager : MonoBehaviour
                     {
                         ManaManager.Instance.SpendMana(Owner.Enemy, card.cost);
 
-                        Debug.Log($"[Enemy] Trying to play: {card.cardName}, hand count before removal: {enemyhand.Count}, handZone child count: {enemyHandZone.childCount}");
                         Transform toRemove = null;
                         foreach (Transform t in enemyHandZone)
                         {
@@ -455,10 +495,8 @@ public class BattleManager : MonoBehaviour
                         if (toRemove != null)
                         {
                             Destroy(toRemove.gameObject);
-                            Debug.Log($"[Enemy] Removed card object from handZone. New child count: {enemyHandZone.childCount}");
                         }
                         enemyhand.Remove(card);
-                        Debug.Log($"[Enemy] Removed card from hand list. New hand count: {enemyhand.Count}");
 
                         GameObject cardObj = Instantiate(cardPrefab, slot);
                         CardDisplay cardDisplay = cardObj.GetComponent<CardDisplay>();
@@ -478,12 +516,14 @@ public class BattleManager : MonoBehaviour
                                 {
                                     EffectContext summonContext = new EffectContext(Owner.Enemy, EffectTarget.FromCard(cardDisplay), null, 0, "");
                                     EffectExecutor.TriggerMonsterEffect(cardDisplay, data, summonContext);
-                                    Debug.Log($"[EnemyPlay] {cardDisplay.cardName} 已上場，觸發 OnSummon / OnPlay 效果");
                                 }
                             }
                         }
 
-                        EnemyLog($"Enemy played {card.cardName} to the field.");
+                        if (BattleLogManager.Instance != null)
+                        {
+                            BattleLogManager.Instance.LogGeneral($"<color=white>Enemy</color> played card: <color=yellow>{card.cardName}</color> (Monster).");
+                        }
                         return;
                     }
                 }
@@ -546,8 +586,11 @@ public class BattleManager : MonoBehaviour
                     enemyhand.Remove(card);
 
                     ShowSpellPopup(card.cardName, card.skillText, card.cost.ToString(), card.cardSprite);
+                    if (BattleLogManager.Instance != null)
+                    {
+                        BattleLogManager.Instance.LogGeneral($"<color=white>Enemy</color> played card: <color=yellow>{card.cardName}</color> (Spell).");
+                    }
                     EffectExecutor.ExecuteSpell(tempDisplay, card);
-                    EnemyLog($"Enemy played spell {card.cardName}.");
                 }
             }
         }
@@ -566,12 +609,18 @@ public class BattleManager : MonoBehaviour
             {
                 EffectTarget randomTarget = validTargets[Random.Range(0, validTargets.Count)];
                 CardDisplay targetCard = randomTarget.card;
-                EnemyLog($"[Enemy] {attacker.cardNameText.text} attacked {targetCard.cardNameText.text}");
+                if (BattleLogManager.Instance != null)
+                {
+                    BattleLogManager.Instance.LogGeneral($"<color=white>Enemy's {attacker.cardName}</color> attacked <color=white>{targetCard.cardName}</color>.");
+                }
                 Attack(attacker, targetCard);
             }
             else
             {
-                EnemyLog($"[Enemy] {attacker.cardNameText.text} direct attack！");
+                if (BattleLogManager.Instance != null)
+                {
+                    BattleLogManager.Instance.LogGeneral($"<color=white>Enemy's {attacker.cardName}</color> attacked directly!");
+                }
                 Attack(attacker, null);
             }
         }

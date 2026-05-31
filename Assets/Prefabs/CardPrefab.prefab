@@ -261,7 +261,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 088db1bd41225b3458f9e9ce8680cddc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damagePopupPrefab: {fileID: 6006007074815001295, guid: f94124adab978dc419dc1dd63e2e3490, type: 3}
+  damagePopupContainer: {fileID: 6120800304917498140}
   stateArea: {fileID: 2819230949384046880}
+  cardPrefabCanvasGroup: {fileID: 7955835176019495382}
   cardNameText: {fileID: 6453214976320292401}
   costText: {fileID: 3972698270746650325}
   skillText: {fileID: 741167545554635341}
@@ -1203,6 +1206,50 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &6120800304917498140
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1474670317513525708}
+  - component: {fileID: 7746550744466689950}
+  m_Layer: 5
+  m_Name: DamagePopupContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1474670317513525708
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6120800304917498140}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2819230949384046880}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 112, y: -243}
+  m_SizeDelta: {x: 0, y: 50}
+  m_Pivot: {x: 1, y: 0}
+--- !u!222 &7746550744466689950
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6120800304917498140}
+  m_CullTransparentMesh: 1
 --- !u!1 &7223575495088887024
 GameObject:
   m_ObjectHideFlags: 0
@@ -1383,6 +1430,7 @@ RectTransform:
   m_Children:
   - {fileID: 3362025445401169801}
   - {fileID: 2102969169206340031}
+  - {fileID: 1474670317513525708}
   m_Father: {fileID: 6183067113478405152}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

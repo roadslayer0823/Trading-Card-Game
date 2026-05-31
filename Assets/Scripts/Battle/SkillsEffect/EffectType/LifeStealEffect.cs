@@ -12,9 +12,15 @@ public class LifeStealEffect : EffectBase
         int value = context.value;
 
         targetCard.TakeDamage(value);
-        Debug.Log($"[LifeSteal Damage] {targetCard.cardName} 受到 {value} 傷害 (來源: {source.cardName})");
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogDamage(source.cardName, targetCard.cardName, value);
+        }
 
         source.Heal(value);
-        Debug.Log($"[LifeSteal Heal] {source.cardName} 恢復 {value} HP");
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogHeal(source.cardName, value);
+        }
     }
 }

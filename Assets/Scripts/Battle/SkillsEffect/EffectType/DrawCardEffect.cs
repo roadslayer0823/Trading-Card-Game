@@ -13,7 +13,13 @@ public class DrawCardEffect : EffectBase
         for(int i = 0; i < context.value; i++)
         {
             BattleManager.Instance.DrawOneCard(owner == Owner.Player);
-            Debug.Log($"[DrawCard] {owner} 抽了 1 張牌 (來源: {source?.cardName ?? "未知"})");
+        }
+
+        if (BattleLogManager.Instance != null)
+        {
+            string ownerName = owner == Owner.Player ? "Player" : "Enemy";
+            string sourceName = source != null ? source.cardName : "Spell";
+            BattleLogManager.Instance.LogGeneral($"<color=white>{ownerName}</color> drew {context.value} card(s) (Source: <color=yellow>{sourceName}</color>).");
         }
     }
 }

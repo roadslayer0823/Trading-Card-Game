@@ -8,6 +8,10 @@ public class DamageReductionEffect : EffectBase
 
         CardDisplay targetCard = context.target.card;
         targetCard.damageReduction = context.value;
-        Debug.Log($"[DamageReduction] {targetCard.cardName} 減傷 +{context.value} (總: {targetCard.damageReduction})");
+        if (BattleLogManager.Instance != null)
+        {
+            string sourceName = source != null ? source.cardName : "Spell";
+            BattleLogManager.Instance.LogStatus($"<color=white>{targetCard.cardName}</color> gained {context.value} Damage Reduction (Source: <color=yellow>{sourceName}</color>).");
+        }
     }
 }

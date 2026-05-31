@@ -11,13 +11,15 @@ public class BuffEffect : EffectBase
         string statType = context.statusName;
         int value = context.value;
 
-        Debug.Log($"[BuffEffect] 收到 類型: {statType}, 數值: {value}");
-
         if (statType == "ATK")
         {
             targetCard.tempAtkBuff += value;
             targetCard.RefreshAtk();
-            Debug.Log($"[Buff] {targetCard.cardName} 攻擊力 +{value} (目前: {targetCard.currentAtkPoint + targetCard.tempAtkBuff})");
+            if (BattleLogManager.Instance != null)
+            {
+                string sourceName = source != null ? source.cardName : "Spell";
+                BattleLogManager.Instance.LogStatus($"<color=white>{targetCard.cardName}</color> ATK +{value} (Source: <color=yellow>{sourceName}</color>).");
+            }
         }
         else if (statType == "HP")
         {
@@ -32,11 +34,18 @@ public class BuffEffect : EffectBase
                 LayoutRebuilder.ForceRebuildLayoutImmediate(targetCard.hpText.GetComponentInParent<RectTransform>());
             }
 
-            Debug.Log($"[Buff HP] {targetCard.cardName} HP 上限 +{value} (新上限: {targetCard.maxHpPoint})");
+            if (BattleLogManager.Instance != null)
+            {
+                string sourceName = source != null ? source.cardName : "Spell";
+                BattleLogManager.Instance.LogStatus($"<color=white>{targetCard.cardName}</color> max HP +{value} (Source: <color=yellow>{sourceName}</color>).");
+            }
         }
         else
         {
-            Debug.LogWarning($"[BuffEffect] 未知或無效的 Buff 類型: {statType}, rawValue: {context.rawValue}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Warning: Unknown or invalid buff type: {statType} (rawValue: {context.rawValue}).");
+            }
         }
     }
 }

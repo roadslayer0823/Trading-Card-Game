@@ -46,11 +46,17 @@ public static class TargetSelector
             if (number > 1 && results.Count > number)
                 results = results.GetRange(0, number);
 
-            Debug.Log($"[TargetSelector] {targetType} -> 选中 {results.Count} 个目標");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Target selector: {targetType} -> {results.Count} target(s) selected.");
+            }
             return results;
         }
 
-        Debug.LogWarning($"[TargetSelector] 未識別的目標類型: {targetType}");
+        if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Warning: Unrecognized target type: {targetType}");
+            }
         return new List<EffectTarget>();
     }
 

@@ -19,7 +19,10 @@ public class StatusEffect : EffectBase
     {
         if(context.target?.type != EffectTargetType.Card || context.target.card == null)
         {
-            Debug.LogWarning("[StatusEffect] 目標不是卡牌，跳過");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral("Warning: Status effect target is not a card.");
+            }
             return;
         }
 
@@ -29,11 +32,17 @@ public class StatusEffect : EffectBase
 
         if (string.IsNullOrEmpty(statusType))
         {
-            Debug.LogWarning($"[StatusEffect] 狀態類型為空，rawValue: {context.rawValue}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Warning: Status type is empty (rawValue: {context.rawValue}).");
+            }
             return;
         }
 
-        Debug.Log($"[狀態效果] {source.cardName} → 對 {actualTarget.cardName} 施加 {statusType}({duration}回合)");
+        if (BattleLogManager.Instance != null)
+        {
+            BattleLogManager.Instance.LogStatus($"<color=white>{source.cardName}</color> applied <color=yellow>{statusType}</color> to <color=white>{actualTarget.cardName}</color> for {duration} turn(s).");
+        }
 
         if (_statusHandlers.TryGetValue(statusType, out var handler))
         {
@@ -41,7 +50,10 @@ public class StatusEffect : EffectBase
         }
         else
         {
-            Debug.LogWarning($"[StatusEffect] 未知狀態類型: {statusType}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Warning: Unknown status type: {statusType}");
+            }
         }
     }
 
@@ -52,7 +64,10 @@ public class StatusEffect : EffectBase
         List<CardDisplay> spreadTargets = TargetSelector.GetSpreadTargets(sourceTarget.owner, 2, sourceTarget);
         if (spreadTargets.Count == 0)
         {
-            Debug.Log("[Spread] 沒有可傳播的目標");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral("Spread: No targets available to spread to.");
+            }
             return;
         }
 
@@ -63,7 +78,10 @@ public class StatusEffect : EffectBase
             {
                 spreadTarget.AddElementTag(tag);
             }
-            Debug.Log($"[元素傳播] {sourceTarget.cardName} 的元素標籤傳播給 {spreadTarget.cardName}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogElementReaction($"<color=cyan>Spread Reaction!</color> Elements from <color=white>{sourceTarget.cardName}</color> spread to <color=white>{spreadTarget.cardName}</color>.");
+            }
         }
     }
 }

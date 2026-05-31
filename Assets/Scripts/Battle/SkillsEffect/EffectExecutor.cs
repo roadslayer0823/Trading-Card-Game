@@ -88,19 +88,31 @@ public class EffectExecutor : MonoBehaviour
         foreach(var trigger in data.triggers)
         {
             if (trigger.effects == null || trigger.effects.Count == 0) continue;
-            Debug.Log($"[TriggerMonsterEffect] {sourceCard.cardName} 觸發 {trigger.skillTiming}，目標類型: {trigger.skillTarget}，sourceOwner: {sourceCard.owner}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"<color=white>{sourceCard.cardName}</color> triggered {trigger.skillTiming} (Target: {trigger.skillTarget}).");
+            }
 
             List<EffectTarget> targets = TargetSelector.GetTargets(trigger.skillTarget, sourceCard.owner, context, sourceCard);
             if(trigger.skillTarget == "Self" && targets.Count == 0 && sourceCard != null)
             {
                 targets.Add(EffectTarget.FromCard(sourceCard));
-                Debug.Log($"[TriggerMonsterEffect] Self 目標強制補救: 加回 {sourceCard.cardName}");
+                if (BattleLogManager.Instance != null)
+                {
+                    BattleLogManager.Instance.LogGeneral($"<color=white>{sourceCard.cardName}</color> self-target fallback applied.");
+                }
             }
                            
-            Debug.Log($"[TriggerMonsterEffect] 取得目標數: {targets.Count}，類型: {trigger.skillTarget}");
+            if (BattleLogManager.Instance != null)
+            {
+                BattleLogManager.Instance.LogGeneral($"Targets selected: {targets.Count} (Type: {trigger.skillTarget}).");
+            }
             foreach (var effectData in trigger.effects)
             {
-                Debug.Log($"[TriggerMonsterEffect] 嘗試建立效果: {effectData.type}");
+                if (BattleLogManager.Instance != null)
+                {
+                    BattleLogManager.Instance.LogGeneral($"Creating effect: {effectData.type}.");
+                }
                 EffectBase effect = EffectFactory.CreateEffect(effectData.type);
                 FillContextFromEffect(effectData, out int val, out string statName, out int dur, out string rawVal);
 
@@ -115,7 +127,10 @@ public class EffectExecutor : MonoBehaviour
                         duration: dur, 
                         rawValue: rawVal
                     );
-                    Debug.Log($"[TriggerMonsterEffect] 執行效果 {effectData.type} 於目標 {target.card?.cardName ?? "無卡"}");
+                    if (BattleLogManager.Instance != null)
+                    {
+                        BattleLogManager.Instance.LogGeneral($"Executing {effectData.type} on <color=white>{target.card?.cardName ?? "Unknown"}</color>.");
+                    }
                     effect.ApplyEffect(sourceCard, targetContext);
                 }
             }

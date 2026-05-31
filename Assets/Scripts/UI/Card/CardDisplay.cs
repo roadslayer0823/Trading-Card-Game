@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 public enum CardZone
 {
@@ -25,7 +23,10 @@ public class CardDisplay : MonoBehaviour
     }
 
     [Header("UI Reference")]
+    public GameObject damagePopupPrefab;
+    public GameObject damagePopupContainer;
     public RectTransform stateArea = null;
+    public CanvasGroup cardPrefabCanvasGroup;
     public TMP_Text cardNameText = null;
     public TMP_Text costText = null;
     public TMP_Text skillText = null;
@@ -61,6 +62,21 @@ public class CardDisplay : MonoBehaviour
 
     private CardDataSO cardDataSO;
     private int frozenTurnRemaining = 0;
+    private CardZone lastZone = CardZone.None;
+    private CanvasGroup canvasGroup;
+
+    private CanvasGroup GetCanvasGroup()
+    {
+        if (canvasGroup == null)
+        {
+            canvasGroup = cardPrefabCanvasGroup != null ? cardPrefabCanvasGroup : GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+        return canvasGroup;
+    }
 
     private void Update()
     {
@@ -72,11 +88,12 @@ public class CardDisplay : MonoBehaviour
                 bool canPlay = ManaManager.Instance.CanAfford(cost, owner);
                 SetGreyedOut(!canPlay);
             }
-            else
+            else if (lastZone == CardZone.Hand)
             {
                 SetGreyedOut(false);
             }
         }
+        lastZone = currentZone;
     }
 
     private static readonly Dictionary<string, Color32> elementColors = new()
@@ -121,50 +138,58 @@ public class CardDisplay : MonoBehaviour
         SetElementColor(data.element);
     }
 
-   public void UpdateStatusAtTurnEnd()
-   {
-        if (isFrozen)
-        {
-            frozenTurnRemaining--;
-            if (frozenTurnRemaining <= 0)
-            {
-                isFrozen = false;
-                currentAtkPoint = atkPoint;
-                RefreshAtk();
-                Debug.Log($"{cardName} 的冰冻状态解除，攻击力恢复为 {currentAtkPoint}。");
-            }
-        }
+    public void UpdateStatusAtTurnEnd()
+    {
+         if (isFrozen)
+         {
+             frozenTurnRemaining--;
+             if (frozenTurnRemaining <= 0)
+             {
+                 isFrozen = false;
+                 currentAtkPoint = atkPoint;
+                 RefreshAtk();
+                 if (BattleLogManager.Instance != null)
+                 {
+                     BattleLogManager.Instance.LogStatus($"<color=white>{cardName}</color>'s freeze status has ended. Attack restored to {currentAtkPoint}.");
+                 }
+             }
+         }
 
-        if (stunTurnRemaining > 0)
-        {
-            stunTurnRemaining--;
-            if (stunTurnRemaining <= 0)
-            {
-                isAttack = true;
-                Debug.Log($"{cardName} 的眩晕状态解除，可以攻击了。");
-            }
-        }
+         if (stunTurnRemaining > 0)
+         {
+             stunTurnRemaining--;
+             if (stunTurnRemaining <= 0)
+             {
+                 isAttack = true;
+                 if (BattleLogManager.Instance != null)
+                 {
+                     BattleLogManager.Instance.LogStatus($"<color=white>{cardName}</color>'s stun status has ended. Ready to attack!");
+                 }
+             }
+         }
 
-        if(untargetableTurnRemaining > 0)
-        {
-            untargetableTurnRemaining--;
-            if(untargetableTurnRemaining <= 0)
-            {
-                Debug.Log($"{cardName} 的 Untargetable 狀態解除");
-                GetComponent<CanvasGroup>().alpha = 1f;
-            }
-        }
+         if(untargetableTurnRemaining > 0)
+         {
+             untargetableTurnRemaining--;
+             if(untargetableTurnRemaining <= 0)
+             {
+                 if (BattleLogManager.Instance != null)
+                 {
+                     BattleLogManager.Instance.LogStatus($"<color=white>{cardName}</color> is no longer untargetable.");
+                 }
+                 GetCanvasGroup().alpha = 1f;
+             }
+         }
 
-        // Auto-restore alpha when BOTH effects are gone
-        if (!isFrozen && stunTurnRemaining <= 0)
-        {
-            GetComponent<CanvasGroup>().alpha = 1f;
-        }
+         // Auto-restore alpha when BOTH effects are gone
+         if (!isFrozen && stunTurnRemaining <= 0)
+         {
+             GetCanvasGroup().alpha = 1f;
+         }
     }
 
     public void ApplyFreeze(int duration, CardDisplay targetCard)
     {
-        Debug.Log($"[ApplyFreeze] 開始凍結 {targetCard.cardName} {duration} 回合");
         if (!isFrozen)
         {
             currentAtkPoint = 0;
@@ -173,22 +198,20 @@ public class CardDisplay : MonoBehaviour
 
         isFrozen = true;
         frozenTurnRemaining = Mathf.Max(frozenTurnRemaining, duration + 1);
-        GetComponent<CanvasGroup>().alpha = 0.5f;
-        Debug.Log($"[ApplyFreeze] 完成：{targetCard.cardName} 被凍結 {frozenTurnRemaining} 回合，ATK = 0");
+        GetCanvasGroup().alpha = 0.5f;
     }
 
     public void ApplyStun(int duration)
     {
         isAttack = false;
         stunTurnRemaining = Mathf.Max(stunTurnRemaining, duration + 1);
-        GetComponent<CanvasGroup>().alpha = 0.5f;
+        GetCanvasGroup().alpha = 0.5f;
     }
 
     public void ApplyUntargetable(int duration)
     {
         untargetableTurnRemaining = Mathf.Max(untargetableTurnRemaining, duration + 1);
-        GetComponent<CanvasGroup>().alpha = 0.7f;
-        Debug.Log($"{cardName} 獲得 Untargetable（無法被選為目標），持續 {duration} 回合");
+        GetCanvasGroup().alpha = 0.7f;
     }
 
     public void Heal(int amount)
@@ -196,7 +219,6 @@ public class CardDisplay : MonoBehaviour
         int newMaxHp = maxHpPoint + tempHpBuff;
         hpPoint = Mathf.Min(hpPoint + amount, newMaxHp);
         hpText.text = hpPoint.ToString();
-        Debug.Log($"{cardName} 恢复 {amount} 点HP，当前HP为 {hpPoint}/{newMaxHp}");
     }
 
     public void TakeDamage(int dmg)
@@ -212,10 +234,37 @@ public class CardDisplay : MonoBehaviour
                 parentSlot.isOccupied = false;
             }
             Destroy(gameObject);
+            return;
         }
 
         hpText.text = Mathf.Max(hpPoint, 0).ToString();
-        Debug.Log($"{cardName} take {reducedDamage} damage, final hp is {hpPoint}");
+
+        ShakeCard();
+
+        if(damagePopupPrefab != null)
+        {
+            Vector3 startPos = hpText.transform.position;
+            Vector3 spawnPos = startPos + new Vector3(0, 30f, 0);
+            GameObject popupObj = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity, damagePopupContainer.transform);
+            DamagePopup popup = popupObj.GetComponent<DamagePopup>();
+            if(popup != null)
+            {
+                popup.Show(reducedDamage, spawnPos);
+            }
+        }
+    }
+
+    private void ShakeCard()
+    {
+        LeanTween.cancel(gameObject);
+
+        Vector3 originalPos = transform.localPosition;
+
+        LeanTween.sequence()
+        .append(LeanTween.moveLocalX(gameObject, originalPos.x - 15f, 0.08f).setEase(LeanTweenType.easeShake))
+        .append(LeanTween.moveLocalX(gameObject, originalPos.x + 15f, 0.08f).setEase(LeanTweenType.easeShake))
+        .append(LeanTween.moveLocalX(gameObject, originalPos.x - 8f, 0.06f).setEase(LeanTweenType.easeShake))
+        .append(LeanTween.moveLocalX(gameObject, originalPos.x, 0.06f).setEase(LeanTweenType.easeShake));
     }
 
     public void UpdateCount(int newCount)
@@ -236,11 +285,6 @@ public class CardDisplay : MonoBehaviour
         if (!elementTags.Contains(lowerElement))
         {
             elementTags.Add(lowerElement);
-            Debug.Log($"[{cardName}] 获得新元素标签: {lowerElement}");
-        }
-        else
-        {
-            Debug.Log($"[{cardName}] 已拥有元素标签: {lowerElement} (跳过)");
         }
     }
 
@@ -259,13 +303,13 @@ public class CardDisplay : MonoBehaviour
     public void SetIdleAfterAttack()
     {
         isAttack = false;
-        GetComponent<CanvasGroup>().alpha = 0.7f;
+        GetCanvasGroup().alpha = 0.5f;
     }
 
     public void ResetAttackState()
     {
         isAttack = true;
-        GetComponent<CanvasGroup>().alpha = 1f;
+        GetCanvasGroup().alpha = 1f;
     }
     public CardDataSO GetCardDataSO()
     {
@@ -274,7 +318,7 @@ public class CardDisplay : MonoBehaviour
 
     private void SetGreyedOut(bool isGreyed)
     {
-        GetComponent<CanvasGroup>().alpha = isGreyed ? 0.5f : 1f;
+        GetCanvasGroup().alpha = isGreyed ? 0.5f : 1f;
     }
 
     public bool IsUntargetable()

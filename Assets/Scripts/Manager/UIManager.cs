@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,18 +25,30 @@ public class UIManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        // No DontDestroyOnLoad — UIManager is main-scene UI only.
+        // It gets recreated each time MainScene loads.
+    }
+
+    private void Start()
+    {
+        Initialize();
     }
 
     public void Initialize()
     {
-        startGameButton.onClick.AddListener(() => OpenDeckSelectionPanel());
-        confirmationPanel.Initialize();
-        deckOptionPanel.Initialize();
-        deckFilterPanel.Initialize();
+        if (startGameButton != null)
+            startGameButton.onClick.AddListener(() => OpenDeckSelectionPanel());
+        if (confirmationPanel != null)
+            confirmationPanel.Initialize();
+        if (deckOptionPanel != null)
+            deckOptionPanel.Initialize();
+        if (deckFilterPanel != null)
+            deckFilterPanel.Initialize();
 
-        deckFilterPanel.gameObject.SetActive(false);
-        deckBuilderUI.SetActive(false);
+        if (deckFilterPanel != null)
+            deckFilterPanel.gameObject.SetActive(false);
+        if (deckBuilderUI != null)
+            deckBuilderUI.SetActive(false);
     }
 
     public void ShowConfirmationDialog(string message, Action action)
@@ -58,6 +68,8 @@ public class UIManager : MonoBehaviour
 
     public void GotoMainScene()
     {
+        // UIManager will be destroyed when BattleScene unloads.
+        // The fresh MainScene will create a new UIManager and call Start() -> Initialize().
         SceneManager.LoadScene("MainScene");
     }
 }

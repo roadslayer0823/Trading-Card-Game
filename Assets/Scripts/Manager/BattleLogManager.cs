@@ -35,6 +35,21 @@ public class BattleLogManager : MonoBehaviour
         battleLogUI.AddLog(message, new Color(0.3f, 0.7f, 1f));
     }
 
+    public void LogInvalidTarget()
+    {
+        battleLogUI.AddLog($"No Valid Target", Color.red);
+    }
+
+    public void LogInvalidZone()
+    {
+        battleLogUI.AddLog($"Invalid Zone", Color.red);
+    }
+    
+    public void LogInsufficientMana()
+    {
+        battleLogUI.AddLog($"Insufficient Mana", Color.red);
+    }
+
     public void LogStatus(string message)
     {
         battleLogUI.AddLog(message, new Color(1f, 0.8f, 0.2f));

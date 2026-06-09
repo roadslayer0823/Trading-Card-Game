@@ -119,7 +119,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
 
         if (target == null || target.owner != cardDisplay.owner || target.cardType != "Monster")
         {
-            FeedbackManager.Instance.ShowFeedback(CardPlayError.NoValidTarget);
+            BattleLogManager.Instance.LogInvalidTarget();
             ManaManager.Instance.ReturnMana(cardDisplay.owner, data.cost);
             return false;
         }
@@ -137,7 +137,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         // 先檢查位置是否合法
         if (slot.isOccupied)
         {
-            FeedbackManager.Instance.ShowFeedback(CardPlayError.InvalidZone);
+            BattleLogManager.Instance.LogInvalidZone();
             return false;
         }
 
@@ -150,7 +150,7 @@ public class BattleCardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHand
         // 如果是法術，檢查自動目標是否有效（在扣魔力之前！）
         if (cardDisplay.cardType == "Spell" && !HasValidAutoTargets(cardDisplay, data))
         {
-            FeedbackManager.Instance.ShowFeedback(CardPlayError.NoValidTarget);
+            BattleLogManager.Instance.LogInvalidTarget();
             ManaManager.Instance.ReturnMana(cardDisplay.owner, data.cost);
             return false;
         }

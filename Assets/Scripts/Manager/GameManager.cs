@@ -25,6 +25,6 @@ public class GameManager : MonoBehaviour
     {
         if (DeckManager != null) DeckManager.Initialize();
         if (DeckBuilderManager != null) DeckBuilderManager.Initialize();
-        if (UIManager != null) UIManager.Initialize();
+        // UIManager self-initializes via its own Start() — no call needed here.
     }
 }

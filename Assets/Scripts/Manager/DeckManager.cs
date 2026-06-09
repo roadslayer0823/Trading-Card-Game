@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -17,7 +16,7 @@ public class DeckManager : MonoBehaviour
     private int maxDeckSize = 30;
     private int maxCopiesPerCard = 3;
     private int maxHandSize = 10;
-    private string decksSavePath => Path.Combine(Application.persistentDataPath, "saved_decks.json");
+    private const string DECKS_PREFS_KEY = "saved_decks";
 
     private Dictionary<string, int> currentDeck = new();
     private List<ModelDatas.SavedDeck> savedDecks = new List<ModelDatas.SavedDeck>();
@@ -201,8 +200,9 @@ public class DeckManager : MonoBehaviour
     public void SaveAllDecks()
     {
         string json = JsonConvert.SerializeObject(savedDecks, Formatting.Indented);
-        File.WriteAllText(decksSavePath, json);
-        Debug.Log($"Saved {savedDecks.Count} decks to {decksSavePath}");
+        PlayerPrefs.SetString(DECKS_PREFS_KEY, json);
+        PlayerPrefs.Save(); // Required on WebGL to flush to IndexedDB
+        Debug.Log($"Saved {savedDecks.Count} decks to PlayerPrefs.");
     }
 
     public void SaveCurrentDeckAs(string deckName, string description = "", string coverCardID = "")
@@ -232,16 +232,16 @@ public class DeckManager : MonoBehaviour
 
     public void LoadAllDecks()
     {
-        if (!File.Exists(decksSavePath))
+        if (!PlayerPrefs.HasKey(DECKS_PREFS_KEY))
         {
             Debug.Log("No saved decks found, starting with empty list.");
             savedDecks = new List<ModelDatas.SavedDeck>();
             return;
         }
 
-        string json = File.ReadAllText(decksSavePath);
+        string json = PlayerPrefs.GetString(DECKS_PREFS_KEY, "");
         savedDecks = JsonConvert.DeserializeObject<List<ModelDatas.SavedDeck>>(json) ?? new List<ModelDatas.SavedDeck>();
-        Debug.Log($"Loaded {savedDecks.Count} decks from {decksSavePath}");
+        Debug.Log($"Loaded {savedDecks.Count} decks from PlayerPrefs.");
     }
 
     public bool LoadDeckByName(string deckName)

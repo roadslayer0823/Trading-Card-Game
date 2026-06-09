@@ -17,19 +17,52 @@ public class EffectExecutor : MonoBehaviour
             int pClose = s.IndexOf(')');
             if (pOpen > 0 && pClose > pOpen)
             {
-                statusName = s.Substring(0, pOpen);
+                statusName = s.Substring(0, pOpen).Trim();
                 int.TryParse(s.Substring(pOpen + 1, pClose - pOpen - 1), out duration);
             }
             else 
             {
-                statusName = s;
+                statusName = s.Trim();
             }
         }
         else if (!string.IsNullOrEmpty(effectData.stat))
         {
-            statusName = effectData.stat;
+            // Normalize stat strings like "Damage+2", "HP +5", "ATK+3" into clean names.
+            statusName = NormalizeStatName(effectData.stat);
+
+            // If no explicit value was set, try to parse it from the stat string (e.g. "Damage+2" → 2).
+            if (value == 0)
+            {
+                int plusIdx = effectData.stat.IndexOf('+');
+                if (plusIdx >= 0 && int.TryParse(effectData.stat.Substring(plusIdx + 1).Trim(), out int parsedVal))
+                    value = parsedVal;
+            }
         }
     }
+
+    // Maps raw stat strings (with optional numeric suffix) to canonical names used by effects.
+    private static string NormalizeStatName(string raw)
+    {
+        int plusIdx = raw.IndexOf('+');
+        string baseName = (plusIdx >= 0 ? raw.Substring(0, plusIdx) : raw).Trim().ToLower();
+
+        switch (baseName)
+        {
+            case "damage":
+            case "atk":
+            case "attack":
+                return "ATK";
+            case "hp":
+            case "health":
+            case "maxhp":
+            case "max hp":
+                return "HP";
+            default:
+                // Return trimmed base without the numeric suffix, preserving original casing.
+                return (plusIdx >= 0 ? raw.Substring(0, plusIdx) : raw).Trim();
+        }
+    }
+
 
     public static void ExecuteSpell(CardDisplay source, CardDataSO data)
     {

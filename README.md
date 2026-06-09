@@ -10,7 +10,8 @@ A Unity-based trading card game featuring elemental reactions, strategic deck bu
 - **Status Effects**: Freeze, Stun, Untargetable, and Spread mechanics
 - **Card Effects**: Damage, Healing, Buffs, Life Steal, Draw Cards, Damage Reduction
 - **Battle Log**: Real-time combat logging with color-coded messages
-- **Save/Load System**: Persistent deck storage with JSON serialization
+- **Save/Load System**: Persistent deck storage using PlayerPrefs (cross-platform, including WebGL)
+- **WebGL Support**: Fully playable in browser via WebGL build
 
 ## Project Structure
 
@@ -114,7 +115,8 @@ Effects are executed through a trigger-based system:
 - Save/load decks with custom names
 
 **Deck Storage:**
-- Decks saved as JSON in persistent data path
+- Decks serialized as JSON and stored via `PlayerPrefs` (key: `saved_decks`)
+- Compatible with all platforms including **WebGL** (uses browser IndexedDB)
 - Can edit existing decks
 - Can delete saved decks
 
@@ -167,9 +169,22 @@ Effects are executed through a trigger-based system:
    - TextMesh Pro
    - Addressables
    - LeanTween (included)
+   - Newtonsoft.Json
 3. Set up card data in `Assets/ScriptableObjects/Cards/`
-4. Assign card assets to Addressables with label "CardData"
-5. Configure manager references in the scene
+4. Assign card assets to Addressables with label `CardData`
+5. In **Window → Asset Management → Addressables → Groups**, ensure the **CardData** group has the following schemas attached:
+   - `Content Packing & Loading` (Build Path: `Local.BuildPath`, Load Path: `Local.LoadPath`)
+   - `Content Update Restrictions`
+6. Build Addressables: **Groups → Build → New Build → Default Build Script**
+7. Configure manager references in the scene
+
+## WebGL Deployment
+
+1. Complete the Addressables build (Step 6 above) before each WebGL build
+2. In **Build Settings**, select **WebGL** platform
+3. Optionally enable **Development Build** to see console logs in the browser (`F12 → Console`)
+4. Build and upload the output folder to your web server
+5. Deck data persists in the browser's IndexedDB via `PlayerPrefs`
 
 ## Card Creation
 

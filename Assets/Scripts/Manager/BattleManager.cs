@@ -710,7 +710,8 @@ public class BattleManager : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        UIManager.Instance.GotoMainScene();
+        // UIManager only lives in MainScene, so load directly here.
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainScene");
     }
 }
 

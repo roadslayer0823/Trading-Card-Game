@@ -77,7 +77,7 @@ public class ManaManager : MonoBehaviour
     {
         if (currentMana[owner] < amount)
         {
-            FeedbackManager.Instance.ShowFeedback(CardPlayError.InsufficientMana);
+            BattleLogManager.Instance.LogInsufficientMana();
             return false;
         } 
         currentMana[owner] -= amount;

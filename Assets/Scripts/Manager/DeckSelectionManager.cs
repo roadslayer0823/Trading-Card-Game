@@ -13,7 +13,6 @@ public class DeckSelectionManager : MonoBehaviour
     public GameObject deckItemPrefab;
     public TMP_Text selectedDeckText;
     public Button startButton;
-    public Button backButton;
     public Button createButton;
     public Transform deckContent;
 
@@ -31,10 +30,9 @@ public class DeckSelectionManager : MonoBehaviour
 
     private void OnEnable()
     {
-        startButton.interactable = false;
-        selectedDeckText.text = "Select a Deck";
-        backButton.onClick.AddListener(OnBackClicked);
-        createButton.onClick.AddListener(OnCreateClicked);
+        if (startButton != null) startButton.interactable = false;
+        if (selectedDeckText != null) selectedDeckText.text = "Select a Deck";
+        if (createButton != null) createButton.onClick.AddListener(OnCreateClicked);
     }
 
     public void RefreshDeckList()
@@ -79,11 +77,6 @@ public class DeckSelectionManager : MonoBehaviour
     {
         DeckManager.Instance.LoadDeckByName(deckName);
         UnityEngine.SceneManagement.SceneManager.LoadScene("BattleScene");
-    }
-
-    private void OnBackClicked()
-    {
-        gameObject.SetActive(false);
     }
 
     private void OnCreateClicked()

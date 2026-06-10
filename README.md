@@ -1,5 +1,5 @@
 # Trading Card Game
-
+🎮 Live WebGL Demo: https://play.unity.com/en/games/c5968faf-972f-49f5-a16b-2de19d9da6c8/trading-card-game-tcg-framework
 A Unity-based trading card game featuring elemental reactions, strategic deck building, and turn-based combat.
 
 ## Features
@@ -113,6 +113,7 @@ Effects are executed through a trigger-based system:
 - Maximum 3 copies per card
 - Filter cards by element, cost, and type
 - Save/load decks with custom names
+- **Fallback Starter Deck**: Automatically generates a pre-configured starter deck if no local data exists, allowing immediate access to the Battle Scene for first-time players.
 
 **Deck Storage:**
 - Decks serialized as JSON and stored via `PlayerPrefs` (key: `saved_decks`)

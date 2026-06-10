@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -26,6 +24,12 @@ public class DeckSelectionManager : MonoBehaviour
     private void Start()
     {
         RefreshDeckList();
+        
+        // Subscribe to card pool loaded event to refresh deck list when default deck is created
+        if (DeckManager.Instance != null)
+        {
+            DeckManager.Instance.OnCardPoolLoaded += RefreshDeckList;
+        }
     }
 
     private void OnEnable()

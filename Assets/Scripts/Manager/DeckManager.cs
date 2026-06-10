@@ -17,12 +17,14 @@ public class DeckManager : MonoBehaviour
     private int maxCopiesPerCard = 3;
     private int maxHandSize = 10;
     private const string DECKS_PREFS_KEY = "saved_decks";
+    private const string DEFAULT_DECK_NAME = "testing deck 1";
 
     private Dictionary<string, int> currentDeck = new();
     private List<ModelDatas.SavedDeck> savedDecks = new List<ModelDatas.SavedDeck>();
     private List<CardDataSO> playerDeckList = new();
     private List<CardDataSO> enemyDeckList = new();
     private Dictionary<string, CardDataSO> cardLookup = new();
+    private bool needsDefaultDeck = false;
 
     public void Awake()
     {
@@ -55,6 +57,13 @@ public class DeckManager : MonoBehaviour
                     cardLookup[card.id] = card;
                 }
                 Debug.Log($"Successfully loaded {cardPool.Count} cards via Addressables.");
+                
+                // Create default deck if needed after card pool is loaded
+                if (needsDefaultDeck)
+                {
+                    CreateDefaultDeck();
+                }
+                
                 OnCardPoolLoaded?.Invoke();
             }
             else
@@ -236,12 +245,60 @@ public class DeckManager : MonoBehaviour
         {
             Debug.Log("No saved decks found, starting with empty list.");
             savedDecks = new List<ModelDatas.SavedDeck>();
+            needsDefaultDeck = true;
             return;
         }
 
         string json = PlayerPrefs.GetString(DECKS_PREFS_KEY, "");
         savedDecks = JsonConvert.DeserializeObject<List<ModelDatas.SavedDeck>>(json) ?? new List<ModelDatas.SavedDeck>();
+        
+        // If decks exist but list is empty, create default deck
+        if (savedDecks.Count == 0)
+        {
+            needsDefaultDeck = true;
+        }
+        
         Debug.Log($"Loaded {savedDecks.Count} decks from PlayerPrefs.");
+    }
+
+    private void CreateDefaultDeck()
+    {
+        if (cardPool == null || cardPool.Count == 0)
+        {
+            Debug.LogWarning("Cannot create default deck: card pool is empty.");
+            return;
+        }
+
+        Debug.Log("Creating default deck: " + DEFAULT_DECK_NAME);
+
+        Dictionary<string, int> defaultCards = new Dictionary<string, int>();
+        int deckSize = 0;
+
+        // Add cards to deck (max 30 cards, max 3 copies per card)
+        foreach (var card in cardPool)
+        {
+            if (deckSize >= maxDeckSize) break;
+
+            int copiesToAdd = Mathf.Min(maxCopiesPerCard, maxDeckSize - deckSize);
+            defaultCards[card.id] = copiesToAdd;
+            deckSize += copiesToAdd;
+
+            if (deckSize >= maxDeckSize) break;
+        }
+
+        ModelDatas.SavedDeck defaultDeck = new ModelDatas.SavedDeck
+        {
+            deckName = DEFAULT_DECK_NAME,
+            cards = defaultCards,
+            description = "Default deck for testing",
+            coverCardID = ""
+        };
+
+        savedDecks.Add(defaultDeck);
+        SaveAllDecks();
+        needsDefaultDeck = false;
+
+        Debug.Log($"Default deck '{DEFAULT_DECK_NAME}' created with {deckSize} cards.");
     }
 
     public bool LoadDeckByName(string deckName)

@@ -1,15 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class CardDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    public CardDisplay cardDisplay;
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
-    private Transform originalParent;
-    private Vector2 originalPosition;
-
-    public CardDisplay cardDisplay;
 
     void Awake() 
     {

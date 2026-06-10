@@ -25,8 +25,6 @@ public class UIManager : MonoBehaviour
             return;
         }
         Instance = this;
-        // No DontDestroyOnLoad — UIManager is main-scene UI only.
-        // It gets recreated each time MainScene loads.
     }
 
     private void Start()
@@ -68,8 +66,6 @@ public class UIManager : MonoBehaviour
 
     public void GotoMainScene()
     {
-        // UIManager will be destroyed when BattleScene unloads.
-        // The fresh MainScene will create a new UIManager and call Start() -> Initialize().
         SceneManager.LoadScene("MainScene");
     }
 }

@@ -625,15 +625,6 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
-
-    private void EnemyLog(string currentAction)
-    {
-        if (enemyCurrentBehaviour != null)
-        {
-            enemyCurrentBehaviour.text = currentAction;
-        }
-    }
-
     private bool NeedsTarget(string targetType)
     {
         return targetType != "Self" || targetType != "None" || targetType != "";  // 根據你的 targetType 調整
